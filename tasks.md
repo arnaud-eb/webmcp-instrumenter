@@ -51,8 +51,22 @@ to spot — if a task doesn't trace to a story, it's scope creep.
       glance.
 
 ## Phase 6 — Deploy to test sites (descoped — see requirements.md v1.1)
-- [ ] T6.1: Set up a free Shopify dev store (Shopify Partners account).
-      Register an origin trial token for its domain.
+- [ ] T6.1a: Create a free Shopify Partners account (partners.shopify.com,
+      no billing info). **Needs hands-on help — Arnaud enters his own
+      credentials; this is a manual prerequisite, not an agent-automatable step.**
+- [ ] T6.1b: Create a **development store** (type: "test and build" — the free,
+      non-expiring kind, *not* the transfer-to-client kind). Record the assigned
+      `<store>.myshopify.com` origin — this is the owned origin all deploy steps
+      target.
+- [ ] T6.1c: Seed instrumentable markup: keep Dawn's contact page
+      (`/pages/contact`), add 1–2 products so product/add-to-cart forms exist.
+      These are the first crawl→draft→deploy candidates.
+- [ ] T6.1d: Note the storefront **password gate** (dev stores are password-
+      protected by default): either capture the password for Playwright or
+      disable the gate for the test window — **crawl (T1.x) prerequisite.**
+- [ ] T6.1e: Register a Chrome 149 origin-trial token for the
+      `<store>.myshopify.com` origin (manual per-domain step, Principle I / NG3)
+      — **deploy (T6.2) prerequisite.**
 - [ ] T6.2: Deploy instrumentation + logger to the Shopify dev store, run
       T4.1 checklist.
 - [ ] T6.3: Run `crawl` + `draft` (no deploy) against 1–2 of the official
