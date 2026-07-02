@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .specify/scripts/bash/session-context.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

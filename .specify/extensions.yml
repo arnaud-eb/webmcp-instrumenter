@@ -1,0 +1,12 @@
+# Spec-Kit extension hooks — PROJECT-SCOPED. Read and dispatched by the speckit
+# skills (e.g. /speckit-specify) when they run in this repo. Not global.
+#
+# after_specify: once the spec directory + .specify/feature.json exist, cut a git
+# feature branch named after the spec directory basename. Mandatory (auto-runs).
+# Implemented by the custom command /speckit-git-branch, which calls
+# .specify/scripts/bash/create-feature-branch.sh (idempotent).
+hooks:
+  after_specify:
+    - command: speckit.git.branch
+      optional: false
+      description: Cut a git feature branch matching the new spec directory.
