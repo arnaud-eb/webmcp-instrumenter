@@ -118,3 +118,8 @@ on later.
   nav links automatically) or is single-URL-at-a-time acceptable for v1?
 - Should low-confidence candidates be shown for review or silently dropped?
 - What's the actual go/no-go site list — which 5 sites, confirmed access?
+- Which logging sink? Supabase is only one option and its free tier auto-pauses
+  after ~1 week of inactivity (Arnaud is also already at the 2-active-project free
+  cap). The sink must stay reachable for the full 4–6 week window without dropping
+  events (constitution Principle III). Candidates: Supabase (paused-project tradeoff),
+  Cloudflare Workers + D1/KV, Upstash — pick one during clarify before Phase 0 (T0.1).

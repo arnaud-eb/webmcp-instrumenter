@@ -7,6 +7,9 @@ Bump rationale:
     all placeholder tokens replaced with project-specific principles.
   1.0.1 — PATCH: clarify site #1 is a free Shopify Partners dev store not yet created
     (setup is a prerequisite task needing hands-on help); no principle change.
+  1.0.2 — PATCH: make the logging sink provider-agnostic (Supabase was only an example);
+    defer provider choice to the clarify stage, constrained by Principle III (no
+    auto-pause / silent event loss). No principle change.
 
 Modified principles: N/A (initial ratification — no prior named principles)
 
@@ -86,9 +89,13 @@ intervene.
 
 This is a throwaway measurement tool that must exist for ~4–6 weeks to answer one question,
 not a product. NO multi-tenant dashboard, NO auth, NO billing, NO custom backend, NO UI
-(NG1). Reach for the simplest thing that works (e.g. a single insert-only Supabase table
-over a hand-rolled service). Complexity that is not justified by answering the go/no-go
-question is out of scope by default.
+(NG1). Reach for the simplest thing that works: a single insert-only logging sink over a
+hand-rolled service. The specific provider is deliberately NOT fixed here (candidates
+include Supabase, Cloudflare Workers + D1/KV, Upstash, etc.) — it is a `clarify`-stage
+decision. The only hard requirement on the sink is Principle III: it MUST stay reachable
+for the full measurement window without silently dropping events (note that some free tiers
+auto-pause on inactivity, which would violate this). Complexity that is not justified by
+answering the go/no-go question is out of scope by default.
 
 Rationale: over-engineering infrastructure for a tool with a known short lifespan is wasted
 spend. This is a deliberate place to *not* apply maximal rigor to disposable infrastructure,
@@ -148,4 +155,4 @@ amended first.
   expansion beyond Principle V / the Scope Discipline section MUST be justified in writing
   or rejected. Deviations from Principles I–III are not justifiable within v1 scope.
 
-**Version**: 1.0.1 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-02
+**Version**: 1.0.2 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-02
