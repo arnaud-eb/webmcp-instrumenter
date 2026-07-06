@@ -4,10 +4,27 @@ Each task is sized to be roughly one agent session (Claude Code / Cursor).
 Task IDs map back to the user stories in requirements.md so drift is easy
 to spot — if a task doesn't trace to a story, it's scope creep.
 
+> **Phase 0–5 can proceed entirely on localhost — the Shopify store does NOT
+> gate early development.** Chrome 149 exposes WebMCP without an origin-trial
+> token when you enable `chrome://flags/#enable-webmcp-testing` (and `localhost`
+> is a trusted trial context anyway). So the full chain
+> crawl → draft → generate → serve on localhost → register → invoke → log → report
+> (US1–US4 + US6, plus the US5 checklist) is exercisable today, with no Partners
+> store and no token. Phase 6 (T6.1+) is still required for the *real* deploy path
+> — the per-domain origin-trial token step and real organic agent traffic are
+> exactly what localhost does NOT prove — but it no longer blocks writing/proving
+> the code. Build on localhost first; do the store/token/traffic phase once the
+> pipeline works.
+
 ## Phase 0 — Setup
-- [ ] T0.1: Repo scaffold, Python env, Playwright install + browser binaries,
-      Supabase project + insert-only logging table with RLS policy.
+- [ ] T0.1: Repo scaffold, Python env, Playwright install + browser binaries.
+      Logging sink: a **Cloudflare Worker + D1** table with an insert-only POST
+      endpoint (chosen in clarify — free tier, no inactivity auto-pause).
       *(No story — infra prerequisite for everything else.)*
+- [ ] T0.2: Enable `chrome://flags/#enable-webmcp-testing` in Chrome 149 and
+      confirm `navigator.modelContext` exists on a localhost page — unblocks all
+      local end-to-end testing without a store or token.
+      *(No story — local test-harness prerequisite.)*
 
 ## Phase 1 — Crawl (US1)
 - [ ] T1.1: `crawl` command: given a URL, render with Playwright, extract
@@ -15,7 +32,10 @@ to spot — if a task doesn't trace to a story, it's scope creep.
 - [ ] T1.2: Filter pass: exclude `display:none` elements, flag likely
       cosmetic widgets (cookie banners, carousels) as low-confidence.
 - [ ] T1.3: Output `candidates.json` matching the schema in design.md.
-- [ ] T1.4: Manual test against 2 real sites — confirm candidate list is
+- [ ] T1.4: Origin-trial detection (FR-017): report whether the crawled origin
+      already advertises a WebMCP origin trial (via `origin-trial` meta tag or
+      `Origin-Trial` response header). Informational only — never a crawl filter.
+- [ ] T1.5: Manual test against 2 real sites — confirm candidate list is
       sane before moving on (don't automate this check yet, eyeball it).
 
 ## Phase 2 — Draft tool contracts (US2)
@@ -33,8 +53,8 @@ to spot — if a task doesn't trace to a story, it's scope creep.
 - [ ] T3.2: For `approved` contracts with `api: "imperative"`, generate a
       `registerTool()` JS block.
 - [ ] T3.3: Generate `.well-known/webmcp` manifest listing all approved tools.
-- [ ] T3.4: Generate the invocation-logger snippet (posts to Supabase,
-      fails silently per US4's non-breaking requirement).
+- [ ] T3.4: Generate the invocation-logger snippet (posts to the Cloudflare
+      Worker endpoint, fails silently per US4's non-breaking requirement).
 
 ## Phase 4 — Validate (US5)
 - [ ] T4.1: Write the manual validation checklist as a markdown file
@@ -44,8 +64,8 @@ to spot — if a task doesn't trace to a story, it's scope creep.
       registration issues found.
 
 ## Phase 5 — Report (US6)
-- [ ] T5.1: `report` command: query Supabase for a date range, print
-      invocation counts grouped by site and tool.
+- [ ] T5.1: `report` command: query the Cloudflare D1 logging store for a date
+      range, print invocation counts grouped by site and tool.
 - [ ] T5.2: Add a simple week-over-week view so the go/no-go signal from
       the pressure-test (organic invocations by week 4) is readable at a
       glance.
