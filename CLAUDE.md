@@ -78,6 +78,11 @@ origin-trial console and pasted into the page head
 and expire. Automating issuance/renewal/revocation across domains is real
 complexity we defer until Experiment B says "go". Manual per-domain for now.
 
+Verified API (Chrome 149, 2026-07-06): imperative `navigator.modelContext`
+(`registerTool` / `getTools` / `executeTool` / `ontoolchange`); declarative
+attributes `toolname` + `tooldescription` on the form, `toolparamdescription` on
+inputs. Local testing without a token: `chrome://flags/#enable-webmcp-testing`.
+
 ## Scope discipline (v1 = test sites only)
 
 Real Benelux SMB outreach is **deferred to v2**. v1 target sites:

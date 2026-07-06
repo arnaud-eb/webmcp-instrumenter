@@ -39,6 +39,30 @@ rest of the design doesn't change.
 - **Reporting:** a single Python script that queries Supabase and prints a
   table (pandas optional, not required for this volume of data).
 
+## WebMCP API reference (verified against Chrome 149 demo, 2026-07-06)
+
+Confirmed empirically by inspecting Google's "Le Petit Bistro" declarative demo in
+Chrome 149 with the WebMCP origin trial live. Use these exact shapes in `generate`:
+
+**Imperative API — `navigator.modelContext`:**
+- `registerTool(toolDef)` — register a tool
+- `getTools()` — returns registered tools; each is `{name, description, inputSchema,
+  origin, window}`, where `inputSchema` is a JSON Schema object
+  (`{type, properties, required}`)
+- `executeTool(...)` — invoke a tool
+- `ontoolchange` — event hook fired when the registered tool set changes
+
+**Declarative API — HTML attributes (no JS):**
+- On the `<form>`: `toolname="snake_case_name"` and `tooldescription="agent-facing text"`
+- On each `<input>`: `toolparamdescription="what this field is"`
+
+**Origin trial:** Chrome 149–156. Token delivered via
+`<meta http-equiv="origin-trial" content="…">` OR an `Origin-Trial:` response header.
+Local dev without a token: enable `chrome://flags/#enable-webmcp-testing` and relaunch.
+
+Note: `navigator.modelContext` and these attribute names match what `design.md` and
+`requirements.md` already assumed — no breaking API change since this build started.
+
 ## Data model
 
 **candidates.json** (output of `crawl`)

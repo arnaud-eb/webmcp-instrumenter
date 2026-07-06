@@ -211,6 +211,10 @@ in tool definitions.
   manual paste-in performed by the operator.
 - **FR-016**: The logging destination MUST remain reachable for the full multi-week
   measurement window without silently dropping events.
+- **FR-017**: During crawl, the tool SHOULD detect and report whether the target origin
+  already advertises a WebMCP origin trial (via an `origin-trial` meta tag or an
+  `Origin-Trial` response header). This signal is informational only and MUST NOT be used
+  to include or exclude a site from crawling.
 
 ### Key Entities
 
@@ -260,7 +264,10 @@ in tool definitions.
   reference; (3) 2–3 real public sites, crawl/draft-only, never deployed to.
 - **Target browser & activation**: the instrumented tools target a WebMCP-capable browser
   (Chrome 149+ origin-trial scope); each deployed origin requires its own origin-trial token,
-  registered manually per domain.
+  registered manually per domain. Verified 2026-07-06 against Google's demo apps that Chrome
+  149 exposes `navigator.modelContext` (imperative) and the declarative `toolname` /
+  `tooldescription` / `toolparamdescription` attributes; local testing without a token is
+  possible via `chrome://flags/#enable-webmcp-testing`.
 - **Unrenderable sites out of scope**: sites the crawler cannot render (heavy client-side
   auth walls, CAPTCHAs) are excluded from v1.
 - **Primary objective of this build is to practice spec-driven development** on a real,
