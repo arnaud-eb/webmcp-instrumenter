@@ -10,6 +10,17 @@
 tool to instrument test sites with WebMCP tools and measure real agent-invocation
 volume for the Experiment B go/no-go decision).
 
+## Clarifications
+
+### Session 2026-07-06
+
+- Q: Which logging sink should the invocation logger post to (must satisfy FR-016)? → A:
+  Cloudflare Workers + D1 — free tier with no inactivity auto-pause.
+- Q: What crawl granularity should v1 support? → A: Single URL per run; automatic
+  multi-page nav-following deferred to v2.
+- Q: How should low-confidence candidates be handled? → A: Surface them in the candidate
+  list flagged low-confidence; never silently drop them.
+
 ## User Scenarios & Testing *(mandatory)*
 
 The primary actor throughout is **Arnaud**, operating the tool in a concierge model
@@ -180,9 +191,11 @@ in tool definitions.
 ### Functional Requirements
 
 - **FR-001**: The tool MUST accept a URL and return a list of candidate actions, each with
-  element type, page location, and a raw HTML snippet.
-- **FR-002**: The tool MUST exclude hidden elements and flag clearly cosmetic widgets as
-  low-confidence rather than presenting them as equal candidates.
+  element type, page location, and a raw HTML snippet. It processes one URL per run;
+  automatic multi-page nav-following is out of scope for v1 (deferred to v2).
+- **FR-002**: The tool MUST exclude only truly hidden elements (e.g. `display:none`).
+  Elements that look cosmetic or ambiguous MUST be surfaced but flagged low-confidence —
+  never silently dropped — so the human reviewer makes the final call.
 - **FR-003**: The tool MUST draft, for each candidate, a snake_case tool name, an
   agent-facing description under 300 characters in the site's primary language, and an
   input JSON Schema.
@@ -250,14 +263,14 @@ in tool definitions.
 
 - **Operator-run, single actor**: the tool is run by Arnaud in a concierge model against
   sites he owns or is authorized to crawl; there is no multi-user, auth, or billing scope.
-- **Crawl granularity (informed default, revisit in clarify)**: v1 processes a single URL
-  per invocation; automatic multi-page nav-following (e.g. auto-discovering "contact",
-  "shop", "book now") is deferred to v2.
-- **Low-confidence handling (informed default, revisit in clarify)**: low-confidence
-  candidates are surfaced and flagged for review, not silently dropped — consistent with the
-  human-gate principle.
-- **Logging destination (revisit in clarify)**: kept provider-agnostic; the only hard
-  requirement is FR-016 (stays reachable for the full window, no auto-pause / silent loss).
+- **Crawl granularity (resolved in clarify)**: v1 processes a single URL per invocation;
+  automatic multi-page nav-following (e.g. auto-discovering "contact", "shop", "book now")
+  is deferred to v2.
+- **Low-confidence handling (resolved in clarify)**: low-confidence candidates are surfaced
+  and flagged for review, never silently dropped — consistent with the human-gate principle.
+- **Logging destination (resolved in clarify)**: Cloudflare Workers + D1 — free tier with
+  no inactivity auto-pause, satisfying FR-016. Chosen over Supabase, whose free tier is
+  capped at 2 active projects and auto-pauses after ~1 week idle.
 - **Target sites for v1 are test sites, by deliberate descope** (not real Benelux SMB
   outreach, which is v2): (1) a free dev store Arnaud owns outright, exercising the full
   pipeline including deploy; (2) official WebMCP demo apps, used crawl/draft-only as

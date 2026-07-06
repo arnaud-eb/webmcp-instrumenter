@@ -137,13 +137,15 @@ on later.
   the one most likely to need human correction. Splitting stages means
   re-running `draft` after a prompt tweak doesn't force you to re-crawl.
 
-## Open questions to resolve during `clarify` (before implementation starts)
-- Do we need multi-page crawl (e.g., follow "contact," "shop," "book now"
-  nav links automatically) or is single-URL-at-a-time acceptable for v1?
-- Should low-confidence candidates be shown for review or silently dropped?
-- What's the actual go/no-go site list — which 5 sites, confirmed access?
-- Which logging sink? Supabase is only one option and its free tier auto-pauses
-  after ~1 week of inactivity (Arnaud is also already at the 2-active-project free
-  cap). The sink must stay reachable for the full 4–6 week window without dropping
-  events (constitution Principle III). Candidates: Supabase (paused-project tradeoff),
-  Cloudflare Workers + D1/KV, Upstash — pick one during clarify before Phase 0 (T0.1).
+## Resolved during `clarify` (Session 2026-07-06)
+- Multi-page crawl vs single-URL → **single URL per run for v1**; multi-page
+  auto-follow deferred to v2.
+- Low-confidence candidates → **surfaced and flagged**, never silently dropped.
+- Logging sink → **Cloudflare Workers + D1** (free tier, no inactivity auto-pause;
+  satisfies the full-window reachability requirement). Chosen over Supabase
+  (2-active-project free cap + ~1-week idle auto-pause).
+
+## Still open (operational, resolve before deploy — not blocking build)
+- The actual category-3 site list — which 2–3 messy public sites, confirmed
+  crawlable (renders, no auth wall/CAPTCHA).
+- The numeric go/no-go threshold the weekly report is compared against.
