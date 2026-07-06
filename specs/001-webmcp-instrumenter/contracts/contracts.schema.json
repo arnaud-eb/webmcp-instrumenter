@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://webmcp-instrumenter/contracts/contracts.schema.json",
+  "title": "contracts.json — output of `draft`, human-edited before `generate`",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["candidate_id", "tool_name", "description", "input_schema", "api", "review_status"],
+    "additionalProperties": false,
+    "properties": {
+      "candidate_id": { "type": "string" },
+      "tool_name": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "description": "snake_case agent-facing tool name"
+      },
+      "description": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300,
+        "description": "Agent-facing, in the site's primary language"
+      },
+      "input_schema": {
+        "type": "object",
+        "description": "A JSON Schema object; validated with jsonschema at draft time",
+        "required": ["type", "properties"],
+        "properties": {
+          "type": { "const": "object" },
+          "properties": { "type": "object" },
+          "required": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "api": { "type": "string", "enum": ["declarative", "imperative"] },
+      "review_status": {
+        "type": "string",
+        "enum": ["needs_review", "approved"],
+        "description": "GATES generation (Principle I): only `approved` contracts emit code"
+      },
+      "note": {
+        "type": "string",
+        "description": "Optional reviewer/drafter note (e.g. why it needs review)"
+      }
+    }
+  }
+}

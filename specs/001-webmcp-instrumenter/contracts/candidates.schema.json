@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://webmcp-instrumenter/contracts/candidates.schema.json",
+  "title": "candidates.json — output of `crawl`",
+  "type": "object",
+  "required": ["_meta", "candidates"],
+  "additionalProperties": false,
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "required": ["page_url", "origin_trial_advertised"],
+      "additionalProperties": false,
+      "properties": {
+        "page_url": { "type": "string", "format": "uri" },
+        "origin_trial_advertised": {
+          "type": "boolean",
+          "description": "FR-017: does the origin advertise a WebMCP origin trial? Informational only."
+        },
+        "origin_trial_source": {
+          "type": ["string", "null"],
+          "enum": ["meta", "header", null]
+        }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "confidence", "page_url", "html_snippet", "visible"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["form", "button"] },
+          "confidence": { "type": "string", "enum": ["high", "low"] },
+          "page_url": { "type": "string", "format": "uri" },
+          "html_snippet": { "type": "string" },
+          "visible": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
