@@ -5,9 +5,11 @@ Task IDs map back to the user stories in requirements.md so drift is easy
 to spot — if a task doesn't trace to a story, it's scope creep.
 
 > **Phase 0–5 can proceed entirely on localhost — the Shopify store does NOT
-> gate early development.** Chrome 149 exposes WebMCP without an origin-trial
-> token when you enable `chrome://flags/#enable-webmcp-testing` (and `localhost`
-> is a trusted trial context anyway). So the full chain
+> gate early development.** Chrome 149 exposes WebMCP on a tokenless page ONLY
+> when you enable `chrome://flags/#enable-webmcp-testing` and relaunch. (Verified
+> 2026-07-06: a bare `localhost` page without the flag does NOT get
+> `navigator.modelContext` — being a secure context is not enough.) With the flag
+> on, the full chain
 > crawl → draft → generate → serve on localhost → register → invoke → log → report
 > (US1–US4 + US6, plus the US5 checklist) is exercisable today, with no Partners
 > store and no token. Phase 6 (T6.1+) is still required for the *real* deploy path
