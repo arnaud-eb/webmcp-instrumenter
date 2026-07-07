@@ -70,11 +70,11 @@ elements excluded; low-confidence surfaced flagged; `_meta.origin_trial_advertis
 ≤300-char `description`, valid `input_schema`, `review_status:"needs_review"`; ambiguous
 fields flagged for review.
 
-- [ ] T017 [US2] `LLMProvider` interface (draft-a-contract method, structured JSON out) in `src/webmcp_instrumenter/llm/base.py`
-- [ ] T018 [US2] Claude provider implementation (strict system prompt for schema drafting) in `src/webmcp_instrumenter/llm/claude.py`
-- [ ] T019 [US2] `draft` command: per candidate → contract; ambiguous/low-confidence → `needs_review` (FR-004) in `src/webmcp_instrumenter/draft.py`
-- [ ] T020 [US2] Validate output: `jsonschema`-valid `input_schema`, snake_case name, ≤300-char description; emit `contracts.json` validated against `contracts/contracts.schema.json`
-- [ ] T021 [P] [US2] Unit test: ambiguous field → `needs_review`; malformed LLM output handled without crash in `tests/unit/test_draft.py`
+- [x] T017 [US2] `LLMProvider` interface (draft-a-contract method, structured JSON out) in `src/webmcp_instrumenter/llm/base.py`
+- [x] T018 [US2] Claude provider implementation (strict system prompt for schema drafting) in `src/webmcp_instrumenter/llm/claude.py`
+- [x] T019 [US2] `draft` command: per candidate → contract; ambiguous/low-confidence → `needs_review` (FR-004) in `src/webmcp_instrumenter/draft.py`
+- [x] T020 [US2] Validate output: `jsonschema`-valid `input_schema`, snake_case name, ≤300-char description; emit `contracts.json` validated against `contracts/contracts.schema.json`
+- [x] T021 [P] [US2] Unit test: ambiguous field → `needs_review`; malformed LLM output handled without crash in `tests/unit/test_draft.py`
 
 **Checkpoint**: US1 + US2 work — drafts ready for human review.
 
