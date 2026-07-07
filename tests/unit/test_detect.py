@@ -1,0 +1,61 @@
+"""Fast, browser-free unit tests for the detection logic (US1)."""
+
+from webmcp_instrumenter.detect import build_candidates, detect_origin_trial
+from webmcp_instrumenter.models import CandidateType, Confidence
+
+URL = "https://example.com/"
+
+
+def _form(**kw):
+    base = {"kind": "form", "outerHTML": "<form>", "displayNone": False,
+            "visible": True, "role": "", "classId": "", "hasVisibleInputs": True}
+    return {**base, **kw}
+
+
+def _button(**kw):
+    base = {"kind": "button", "outerHTML": "<button>", "displayNone": False,
+            "visible": True, "role": "", "classId": "", "text": ""}
+    return {**base, **kw}
+
+
+def test_hidden_elements_are_excluded():
+    raw = [_form(displayNone=True), _button(displayNone=True, text="Add to cart")]
+    assert build_candidates(raw, URL) == []
+
+
+def test_cosmetic_form_is_low_confidence_but_surfaced():
+    raw = [_form(role="search", classId="site-search")]
+    cands = build_candidates(raw, URL)
+    assert len(cands) == 1
+    assert cands[0].confidence is Confidence.LOW  # surfaced, not dropped
+
+
+def test_real_form_is_high_confidence():
+    cands = build_candidates([_form(classId="contact")], URL)
+    assert cands[0].confidence is Confidence.HIGH
+    assert cands[0].type is CandidateType.FORM
+
+
+def test_form_without_visible_inputs_is_low():
+    assert build_candidates([_form(hasVisibleInputs=False)], URL)[0].confidence is Confidence.LOW
+
+
+def test_action_button_high_cosmetic_button_low():
+    raw = [_button(text="Add to cart", classId="add-to-cart"),
+           _button(text="Accept cookies", classId="cookie-accept")]
+    cands = build_candidates(raw, URL)
+    assert cands[0].confidence is Confidence.HIGH
+    assert cands[1].confidence is Confidence.LOW
+
+
+def test_ids_are_sequential_over_included_only():
+    raw = [_form(), _form(displayNone=True), _button(text="Buy")]
+    ids = [c.id for c in build_candidates(raw, URL)]
+    assert ids == ["c1", "c2"]  # hidden one consumed no id
+
+
+def test_origin_trial_meta_and_header_detection():
+    html = '<meta http-equiv="origin-trial" content="X">'
+    assert detect_origin_trial(html, {}) == (True, "meta")
+    assert detect_origin_trial("", {"Origin-Trial": "X"}) == (True, "header")
+    assert detect_origin_trial("", {}) == (False, None)

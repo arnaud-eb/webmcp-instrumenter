@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- FR-017 origin-trial detection case (fake token, meta-tag delivery) -->
+  <meta http-equiv="origin-trial" content="FAKE_TOKEN_FOR_TEST">
+  <title>Crawl fixture — messy markup</title>
+</head>
+<body>
+  <!-- real contact form → HIGH -->
+  <form id="contact" name="contact-form">
+    <input name="name" type="text">
+    <input name="email" type="email">
+    <textarea name="message"></textarea>
+    <button type="submit">Send</button>
+  </form>
+
+  <!-- hidden form → EXCLUDED entirely -->
+  <form id="hidden-form" style="display:none">
+    <input name="secret" type="text">
+    <button>Go</button>
+  </form>
+
+  <!-- cosmetic search widget → LOW -->
+  <form role="search" class="site-search">
+    <input type="search" name="q" placeholder="Search…">
+  </form>
+
+  <!-- standalone action button → HIGH -->
+  <button class="add-to-cart">Add to cart</button>
+
+  <!-- cosmetic cookie button → LOW -->
+  <button class="cookie-accept">Accept cookies</button>
+</body>
+</html>

@@ -21,12 +21,12 @@ logger, param-keys-only, approved-gate) and the two file contracts. Not full TDD
 
 **Purpose**: Project initialization.
 
-- [ ] T001 Create project structure per plan.md (`src/webmcp_instrumenter/`, `src/webmcp_instrumenter/llm/`, `src/webmcp_instrumenter/templates/`, `worker/`, `tests/{unit,integration,fixtures}/`)
-- [ ] T002 Initialize Python 3.13 project: `pyproject.toml` with deps (playwright, anthropic, jsonschema, httpx, typer, pytest) + a 3.13 venv; `pip install -e .`
-- [ ] T003 [P] Install Playwright Chromium binaries (`playwright install chromium`)
-- [ ] T004 [P] Configure ruff (lint+format) and pytest in `pyproject.toml`
-- [ ] T005 [P] Scaffold the Cloudflare Worker project in `worker/` (`wrangler.toml`, `package.json`, `src/index.ts` stub)
-- [ ] T006 Confirm local WebMCP test harness: `chrome://flags/#enable-webmcp-testing` enabled + `navigator.modelContext` present on a localhost page *(env prerequisite — already verified 2026-07-06; re-confirm after any Chrome update)*
+- [x] T001 Create project structure per plan.md (`src/webmcp_instrumenter/`, `src/webmcp_instrumenter/llm/`, `src/webmcp_instrumenter/templates/`, `worker/`, `tests/{unit,integration,fixtures}/`)
+- [x] T002 Initialize Python 3.13 project: `pyproject.toml` with deps (playwright, anthropic, jsonschema, httpx, typer, pytest) + a 3.13 venv; `pip install -e .`
+- [x] T003 [P] Install Playwright Chromium binaries (`playwright install chromium`)
+- [x] T004 [P] Configure ruff (lint+format) and pytest in `pyproject.toml`
+- [x] T005 [P] Scaffold the Cloudflare Worker project in `worker/` (`wrangler.toml`, `package.json`, `src/index.ts` stub)
+- [x] T006 Confirm local WebMCP test harness: `chrome://flags/#enable-webmcp-testing` enabled + `navigator.modelContext` present on a localhost page *(env prerequisite — already verified 2026-07-06; re-confirm after any Chrome update)*
 
 ---
 
@@ -34,10 +34,10 @@ logger, param-keys-only, approved-gate) and the two file contracts. Not full TDD
 
 **Purpose**: Shared code every story depends on. **⚠️ No user story starts until this is done.**
 
-- [ ] T007 Define core models (`Candidate`, `Contract`, `InvocationEvent`, `Report`) per data-model.md in `src/webmcp_instrumenter/models.py`
-- [ ] T008 [P] JSON load/save + JSON-Schema validation helper (validates against `specs/001-webmcp-instrumenter/contracts/*.schema.json`) in `src/webmcp_instrumenter/io.py`
-- [ ] T009 [P] Config/env management (Anthropic API key, sink URL, timeouts) in `src/webmcp_instrumenter/config.py`
-- [ ] T010 CLI skeleton wiring the four subcommands (`crawl`/`draft`/`generate`/`report`) with typer in `src/webmcp_instrumenter/cli.py`
+- [x] T007 Define core models (`Candidate`, `Contract`, `InvocationEvent`, `Report`) per data-model.md in `src/webmcp_instrumenter/models.py`
+- [x] T008 [P] JSON load/save + JSON-Schema validation helper (validates against `specs/001-webmcp-instrumenter/contracts/*.schema.json`) in `src/webmcp_instrumenter/io.py`
+- [x] T009 [P] Config/env management (Anthropic API key, sink URL, timeouts) in `src/webmcp_instrumenter/config.py`
+- [x] T010 CLI skeleton wiring the four subcommands (`crawl`/`draft`/`generate`/`report`) with typer in `src/webmcp_instrumenter/cli.py`
 
 **Checkpoint**: Foundation ready — user stories can begin.
 
@@ -51,12 +51,12 @@ logger, param-keys-only, approved-gate) and the two file contracts. Not full TDD
 `contracts/candidates.schema.json`; the form is a `high`-confidence candidate; hidden
 elements excluded; low-confidence surfaced flagged; `_meta.origin_trial_advertised` present.
 
-- [ ] T011 [P] [US1] HTML fixtures (a real form, a `display:none` form, a cosmetic widget, an origin-trial `<meta>` case) in `tests/fixtures/`
-- [ ] T012 [US1] `crawl` command: Playwright render + extract `<form>` and interactive buttons with outerHTML in `src/webmcp_instrumenter/crawl.py`
-- [ ] T013 [US1] Detection/filtering: exclude `display:none`; flag cosmetic/ambiguous as `confidence:"low"` (never drop) in `src/webmcp_instrumenter/detect.py`
-- [ ] T014 [US1] Origin-trial detection (FR-017): check `origin-trial` meta tag + `Origin-Trial` response header → `_meta` (informational only) in `src/webmcp_instrumenter/detect.py`
-- [ ] T015 [US1] Emit `candidates.json` (array + `_meta`) validated via the T008 helper
-- [ ] T016 [P] [US1] Integration test: crawl fixtures → expected candidate set incl. flag/exclude behavior in `tests/integration/test_crawl.py`
+- [x] T011 [P] [US1] HTML fixtures (a real form, a `display:none` form, a cosmetic widget, an origin-trial `<meta>` case) in `tests/fixtures/`
+- [x] T012 [US1] `crawl` command: Playwright render + extract `<form>` and interactive buttons with outerHTML in `src/webmcp_instrumenter/crawl.py`
+- [x] T013 [US1] Detection/filtering: exclude `display:none`; flag cosmetic/ambiguous as `confidence:"low"` (never drop) in `src/webmcp_instrumenter/detect.py`
+- [x] T014 [US1] Origin-trial detection (FR-017): check `origin-trial` meta tag + `Origin-Trial` response header → `_meta` (informational only) in `src/webmcp_instrumenter/detect.py`
+- [x] T015 [US1] Emit `candidates.json` (array + `_meta`) validated via the T008 helper
+- [x] T016 [P] [US1] Integration test: crawl fixtures → expected candidate set incl. flag/exclude behavior in `tests/integration/test_crawl.py`
 
 **Checkpoint**: US1 independently functional — you can inventory a site.
 

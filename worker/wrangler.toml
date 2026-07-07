@@ -1,0 +1,11 @@
+# Cloudflare Worker — WebMCP invocation logging sink (US4, fleshed out later).
+# Scaffold only at the P1 MVP stage.
+name = "webmcp-logger"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+
+# D1 binding is added in the US4 phase (T028/T031):
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "webmcp_invocations"
+# database_id = "<filled after `wrangler d1 create`>"
