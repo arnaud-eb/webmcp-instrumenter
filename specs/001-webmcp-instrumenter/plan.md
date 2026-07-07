@@ -17,8 +17,9 @@ is human-edited independently.
 
 ## Technical Context
 
-**Language/Version**: Python 3.12 (instrumenter CLI). Logging sink Worker: TypeScript on
-Cloudflare Workers runtime.
+**Language/Version**: Python 3.13 (instrumenter CLI) — latest-but-one, fully supported by
+all deps; the machine's system 3.9 is EOL and must be upgraded (`brew install python@3.13`
+or pyenv). Logging sink Worker: TypeScript on Cloudflare Workers runtime.
 
 **Primary Dependencies**: Playwright (Python) for JS-rendered crawling; Anthropic SDK
 (Claude, the default drafting provider) behind a swappable `LLMProvider` interface;

@@ -10,3 +10,10 @@ hooks:
     - command: speckit.git.branch
       optional: false
       description: Cut a git feature branch matching the new spec directory.
+  # after_plan: refresh the auto-generated "Active feature snapshot" block in
+  # CLAUDE.md from the just-written plan.md. Mandatory (auto-runs). Implemented by
+  # /speckit-agent-context → .specify/scripts/bash/update-agent-context.sh (idempotent).
+  after_plan:
+    - command: speckit.agent.context
+      optional: false
+      description: Refresh the active-feature snapshot in CLAUDE.md from plan.md.

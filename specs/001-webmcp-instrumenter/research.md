@@ -4,12 +4,14 @@ All Technical Context unknowns were resolved during `/speckit-clarify` (Session 
 and by empirical verification of the WebMCP API in Chrome 149. This document records the
 decisions, rationale, and rejected alternatives. **No open `NEEDS CLARIFICATION` remain.**
 
-## D1. Implementation language — Python 3.12
+## D1. Implementation language — Python 3.13
 
-- **Decision**: Python for the instrumenter CLI.
+- **Decision**: Python for the instrumenter CLI, pinned to 3.13.
 - **Rationale**: Scripting/automation-shaped problem (crawl, transform, generate text); no
   UI or standing web app to justify a TS/Next.js stack; deliberate practice target
-  (Constitution / design.md). 3.12 for modern typing + stdlib.
+  (Constitution / design.md). 3.13 = latest-but-one (Python has no LTS; ~5-yr support per
+  release), so all deps support it; 3.14 is newest if bleeding edge is wanted. Note the
+  machine's system Python 3.9 is EOL (Oct 2025) and must be upgraded.
 - **Alternatives considered**: TypeScript/Node (rejected — earns its keep only with a UI or
   web app, neither present); Go (rejected — overkill, weaker LLM/crawl ergonomics).
 
