@@ -10,6 +10,9 @@ Bump rationale:
   1.0.2 — PATCH: make the logging sink provider-agnostic (Supabase was only an example);
     defer provider choice to the clarify stage, constrained by Principle III (no
     auto-pause / silent event loss). No principle change.
+  1.0.3 — PATCH: clarify that the "Language: Python" constraint covers the instrumenter
+    tool's pipeline stages only; the logging-sink Worker (and the generated logger.js) are
+    exempt infrastructure. Resolves analyze finding N1. No principle change.
 
 Modified principles: N/A (initial ratification — no prior named principles)
 
@@ -103,9 +106,13 @@ while keeping full rigor on the principles above that carry real user/legal risk
 
 ## Technology Constraints
 
-- **Language: Python.** The crawler and all pipeline stages are Python. This is a
-  scripting/automation-shaped problem and a deliberate low-stakes place to practice Python;
-  there is no UI or standing web app that would justify a Next.js/TS stack here.
+- **Language: Python.** The crawler and all pipeline stages (`crawl`, `draft`, `generate`,
+  `report`) are Python. This is a scripting/automation-shaped problem and a deliberate
+  low-stakes place to practice Python; there is no UI or standing web app that would justify
+  a Next.js/TS stack here. **Exemption:** the logging-sink Worker is infrastructure, not a
+  pipeline stage, and MAY be authored in its platform's native language (e.g. TypeScript on
+  Cloudflare Workers); the generated client `logger.js` snippet is likewise necessarily
+  JavaScript. Python-only applies to the instrumenter tool itself.
 - **LLM provider is swappable.** Tool-contract drafting MUST NOT hard-lock to a single
   vendor. Claude is the default (Sonnet is sufficient — no extended reasoning needed for
   schema drafting), but the provider seam stays swappable (e.g. Claude/OpenAI).
@@ -155,4 +162,4 @@ amended first.
   expansion beyond Principle V / the Scope Discipline section MUST be justified in writing
   or rejected. Deviations from Principles I–III are not justifiable within v1 scope.
 
-**Version**: 1.0.2 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-02
+**Version**: 1.0.3 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-06

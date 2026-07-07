@@ -150,6 +150,7 @@ inspector, schema validates, no secrets.
 
 - [ ] T039 [P] `README.md`: install, the 4-stage pipeline, localhost quickstart pointer
 - [ ] T040 [P] Additional unit tests for edge cases (empty candidate list, nothing approved, unrenderable page) in `tests/unit/`
+- [ ] T040a [P] Integration test for stage independence (FR-013 / SC-006): re-running `draft` on an existing `candidates.json` does NOT re-invoke `crawl`, and each stage reads/writes only its own file boundary, in `tests/integration/test_stage_independence.py`
 - [ ] T041 ruff lint/format clean across `src/` and `tests/`
 - [ ] T042 Run `quickstart.md` end-to-end on localhost and confirm all steps green
 - [ ] T043 [P] Package metadata + console-script entry point (`webmcp-instrument`) in `pyproject.toml`
