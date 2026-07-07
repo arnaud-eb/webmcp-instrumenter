@@ -23,10 +23,12 @@ to spot — if a task doesn't trace to a story, it's scope creep.
       Logging sink: a **Cloudflare Worker + D1** table with an insert-only POST
       endpoint (chosen in clarify — free tier, no inactivity auto-pause).
       *(No story — infra prerequisite for everything else.)*
-- [ ] T0.2: Enable `chrome://flags/#enable-webmcp-testing` in Chrome 149 and
+- [x] T0.2: Enable `chrome://flags/#enable-webmcp-testing` in Chrome 149 and
       confirm `navigator.modelContext` exists on a localhost page — unblocks all
       local end-to-end testing without a store or token.
-      *(No story — local test-harness prerequisite.)*
+      *(No story — local test-harness prerequisite.)* **Verified 2026-07-06:**
+      tokenless `localhost` exposed `navigator.modelContext` and registered a
+      declarative form's tool with the flag on.
 
 ## Phase 1 — Crawl (US1)
 - [ ] T1.1: `crawl` command: given a URL, render with Playwright, extract
