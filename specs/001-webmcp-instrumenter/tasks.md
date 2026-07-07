@@ -88,12 +88,12 @@ manifest + `logger.js`. First shippable instrumentation.
 **Independent Test**: Given approved + non-approved contracts → code emitted ONLY for
 approved; manifest lists exactly those; no secrets in any output; nothing approved → no code.
 
-- [ ] T022 [US3] `generate` command with the **approved-only gate** (`review_status=="approved"`, else skip) in `src/webmcp_instrumenter/generate.py`
-- [ ] T023 [P] [US3] Declarative emitter (`toolname`/`tooldescription` on form, `toolparamdescription` on inputs) in `src/webmcp_instrumenter/generate.py`
-- [ ] T024 [P] [US3] Imperative `registerTool()` JS emitter in `src/webmcp_instrumenter/generate.py`
-- [ ] T025 [P] [US3] `.well-known/webmcp` manifest emitter from `src/webmcp_instrumenter/templates/manifest.json.j2`
-- [ ] T026 [US3] `logger.js` emitter (non-blocking, posts `param_keys` only) from `src/webmcp_instrumenter/templates/logger.js.j2`
-- [ ] T027 [P] [US3] Unit test (**Principle I + FR-007**): only approved emitted; manifest = approved set; no secrets present in `tests/unit/test_generate.py`
+- [x] T022 [US3] `generate` command with the **approved-only gate** (`review_status=="approved"`, else skip) in `src/webmcp_instrumenter/generate.py`
+- [x] T023 [P] [US3] Declarative emitter (`toolname`/`tooldescription` on form, `toolparamdescription` on inputs) in `src/webmcp_instrumenter/generate.py`
+- [x] T024 [P] [US3] Imperative `registerTool()` JS emitter in `src/webmcp_instrumenter/generate.py`
+- [x] T025 [P] [US3] `.well-known/webmcp` manifest emitter from `src/webmcp_instrumenter/templates/manifest.json.j2`
+- [x] T026 [US3] `logger.js` emitter (non-blocking, posts `param_keys` only) from `src/webmcp_instrumenter/templates/logger.js.j2`
+- [x] T027 [P] [US3] Unit test (**Principle I + FR-007**): only approved emitted; manifest = approved set; no secrets present in `tests/unit/test_generate.py`
 
 **Checkpoint**: 🚀 P1 MVP complete — crawl→draft→generate produces instrumentation for a site.
 

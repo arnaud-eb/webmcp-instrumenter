@@ -1,0 +1,44 @@
+(function () {
+  // WebMCP invocation logger — generated. Records param KEY names only
+  // (Constitution II) and is fire-and-forget / fails open (Constitution III):
+  // a broken sink NEVER breaks the host page or the agent's tool call.
+  var SINK = {{ sink_url }};
+  var SITE = location.host;
+
+  function logInvocation(toolName, success, paramKeys) {
+    try {
+      var payload = JSON.stringify({
+        site: SITE,
+        tool_name: toolName,
+        timestamp: new Date().toISOString(),
+        success: !!success,
+        param_keys: paramKeys || []   // key names only — never values
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(SINK, payload);
+      } else {
+        fetch(SINK, {
+          method: "POST",
+          body: payload,
+          keepalive: true,
+          headers: { "Content-Type": "application/json" }
+        }).catch(function () { /* swallow */ });
+      }
+    } catch (e) {
+      /* fail open — logging must never throw into host-page code */
+    }
+  }
+
+  // Expose for imperative tools to call from their execute() handler.
+  window.webmcpLog = logInvocation;
+
+  // Declarative tools: log on submit of any annotated <form> (key names only).
+  document.addEventListener("submit", function (ev) {
+    try {
+      var f = ev.target;
+      if (f && f.getAttribute && f.getAttribute("toolname")) {
+        logInvocation(f.getAttribute("toolname"), true, Array.from(new FormData(f).keys()));
+      }
+    } catch (e) { /* fail open */ }
+  }, true);
+})();
