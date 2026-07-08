@@ -34,12 +34,11 @@ def crawl(
     save_json(out, payload)
     n_high = sum(1 for c in result.candidates if c.confidence.value == "high")
     n_low = len(result.candidates) - n_high
-    typer.echo(
-        f"crawl: {len(result.candidates)} candidate(s) "
-        f"({n_high} high, {n_low} low) → {out}"
-    )
+    typer.echo(f"crawl: {len(result.candidates)} candidate(s) ({n_high} high, {n_low} low) → {out}")
     if result.meta.origin_trial_advertised:
-        typer.echo(f"  note: origin advertises a WebMCP origin trial ({result.meta.origin_trial_source})")
+        typer.echo(
+            f"  note: origin advertises a WebMCP origin trial ({result.meta.origin_trial_source})"
+        )
 
 
 @app.command()
@@ -90,9 +89,8 @@ def report(
     format: str = typer.Option("table", "--format", help="table|json"),
 ) -> None:
     """US5: weekly invocation counts (implemented in the P2 phase)."""
-    raise typer.Exit(
-        typer.echo("report: not implemented yet (US5 / P2 phase).") or 0
-    )
+    typer.echo("report: not implemented yet (US5 / P2 phase).")
+    raise typer.Exit(0)
 
 
 if __name__ == "__main__":

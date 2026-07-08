@@ -7,14 +7,28 @@ URL = "https://example.com/"
 
 
 def _form(**kw):
-    base = {"kind": "form", "outerHTML": "<form>", "displayNone": False,
-            "visible": True, "role": "", "classId": "", "hasVisibleInputs": True}
+    base = {
+        "kind": "form",
+        "outerHTML": "<form>",
+        "displayNone": False,
+        "visible": True,
+        "role": "",
+        "classId": "",
+        "hasVisibleInputs": True,
+    }
     return {**base, **kw}
 
 
 def _button(**kw):
-    base = {"kind": "button", "outerHTML": "<button>", "displayNone": False,
-            "visible": True, "role": "", "classId": "", "text": ""}
+    base = {
+        "kind": "button",
+        "outerHTML": "<button>",
+        "displayNone": False,
+        "visible": True,
+        "role": "",
+        "classId": "",
+        "text": "",
+    }
     return {**base, **kw}
 
 
@@ -41,8 +55,10 @@ def test_form_without_visible_inputs_is_low():
 
 
 def test_action_button_high_cosmetic_button_low():
-    raw = [_button(text="Add to cart", classId="add-to-cart"),
-           _button(text="Accept cookies", classId="cookie-accept")]
+    raw = [
+        _button(text="Add to cart", classId="add-to-cart"),
+        _button(text="Accept cookies", classId="cookie-accept"),
+    ]
     cands = build_candidates(raw, URL)
     assert cands[0].confidence is Confidence.HIGH
     assert cands[1].confidence is Confidence.LOW

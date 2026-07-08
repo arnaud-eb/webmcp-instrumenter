@@ -47,6 +47,7 @@ class ClaudeProvider(LLMProvider):
 
     def draft(self, candidate: Candidate) -> DraftedContract:
         import anthropic
+        from anthropic.types import TextBlock
 
         client = anthropic.Anthropic(api_key=self.cfg.require_anthropic_key())
         resp = client.messages.create(
@@ -56,11 +57,16 @@ class ClaudeProvider(LLMProvider):
             messages=[
                 {
                     "role": "user",
-                    "content": f"Element type: {candidate.type.value}\nHTML:\n{candidate.html_snippet}",
+                    "content": (
+                        f"Element type: {candidate.type.value}\nHTML:\n{candidate.html_snippet}"
+                    ),
                 }
             ],
         )
-        data = _parse_json(resp.content[0].text)
+        block = resp.content[0]
+        if not isinstance(block, TextBlock):
+            raise RuntimeError(f"unexpected non-text response block: {type(block).__name__}")
+        data = _parse_json(block.text)
 
         api_val = data.get("api")
         api = (

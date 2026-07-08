@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "page_url": "file:///Users/arnauddepierreux/Project/webmcp-instrumenter/tests/fixtures/sample_site.html",
+    "origin_trial_advertised": true,
+    "origin_trial_source": "meta"
+  },
+  "candidates": [
+    {
+      "id": "c1",
+      "type": "form",
+      "confidence": "high",
+      "page_url": "file:///Users/arnauddepierreux/Project/webmcp-instrumenter/tests/fixtures/sample_site.html",
+      "html_snippet": "<form id=\"contact\" name=\"contact-form\">\n    <input name=\"name\" type=\"text\">\n    <input name=\"email\" type=\"email\">\n    <textarea name=\"message\"></textarea>\n    <button type=\"submit\">Send</button>\n  </form>",
+      "visible": true
+    },
+    {
+      "id": "c2",
+      "type": "form",
+      "confidence": "low",
+      "page_url": "file:///Users/arnauddepierreux/Project/webmcp-instrumenter/tests/fixtures/sample_site.html",
+      "html_snippet": "<form role=\"search\" class=\"site-search\">\n    <input type=\"search\" name=\"q\" placeholder=\"Search…\">\n  </form>",
+      "visible": true
+    },
+    {
+      "id": "c3",
+      "type": "button",
+      "confidence": "high",
+      "page_url": "file:///Users/arnauddepierreux/Project/webmcp-instrumenter/tests/fixtures/sample_site.html",
+      "html_snippet": "<button class=\"add-to-cart\">Add to cart</button>",
+      "visible": true
+    },
+    {
+      "id": "c4",
+      "type": "button",
+      "confidence": "low",
+      "page_url": "file:///Users/arnauddepierreux/Project/webmcp-instrumenter/tests/fixtures/sample_site.html",
+      "html_snippet": "<button class=\"cookie-accept\">Accept cookies</button>",
+      "visible": true
+    }
+  ]
+}

@@ -20,6 +20,8 @@ dependencies = [
 dev = [
     "pytest>=8.3",
     "ruff>=0.7",
+    "mypy>=1.13",
+    "pre-commit>=4.0",
 ]
 
 [project.scripts]
@@ -34,6 +36,18 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Typer's public API intentionally uses Option()/Argument() as parameter
+# defaults — allowlist them so B008 doesn't fire on idiomatic CLI code.
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
+[tool.mypy]
+python_version = "3.13"
+files = ["src"]
+ignore_missing_imports = true   # playwright/anthropic/jinja2 ship partial/no stubs
+check_untyped_defs = true
+warn_unused_ignores = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

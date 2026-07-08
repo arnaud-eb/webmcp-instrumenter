@@ -17,15 +17,24 @@ from webmcp_instrumenter.models import (
 
 def _cand(cid="c1", confidence=Confidence.HIGH):
     return Candidate(
-        id=cid, type=CandidateType.FORM, confidence=confidence,
-        page_url="https://ex.com/", html_snippet="<form>", visible=True,
+        id=cid,
+        type=CandidateType.FORM,
+        confidence=confidence,
+        page_url="https://ex.com/",
+        html_snippet="<form>",
+        visible=True,
     )
 
 
 def _drafted(**kw):
-    base = dict(tool_name="submit_contact_form", description="Send a contact message.",
-                input_schema={"type": "object", "properties": {"email": {"type": "string"}}},
-                api=Api.DECLARATIVE, ambiguous=False, note=None)
+    base = dict(
+        tool_name="submit_contact_form",
+        description="Send a contact message.",
+        input_schema={"type": "object", "properties": {"email": {"type": "string"}}},
+        api=Api.DECLARATIVE,
+        ambiguous=False,
+        note=None,
+    )
     return DraftedContract(**{**base, **kw})
 
 
@@ -69,8 +78,11 @@ def test_low_confidence_candidate_is_flagged():
 
 def test_draft_contracts_orchestration(tmp_path):
     candidates = {
-        "_meta": {"page_url": "https://ex.com/", "origin_trial_advertised": False,
-                  "origin_trial_source": None},
+        "_meta": {
+            "page_url": "https://ex.com/",
+            "origin_trial_advertised": False,
+            "origin_trial_source": None,
+        },
         "candidates": [_cand().to_dict()],
     }
     path = tmp_path / "candidates.json"
