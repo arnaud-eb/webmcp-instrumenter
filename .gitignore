@@ -15,8 +15,10 @@ venv/
 worker/node_modules/
 worker/.wrangler/
 
-# Local pipeline output (generated snippets are not committed)
+# Local pipeline output (generated artifacts are not committed)
 out/
+/candidates.json
+/contracts.json
 *.candidates.json
 *.contracts.json
 
