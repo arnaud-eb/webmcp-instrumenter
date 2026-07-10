@@ -87,4 +87,5 @@ def draft_contracts(
     """Draft a contract per candidate. `provider_impl` allows test injection."""
     crawl = CrawlResult.from_dict(load_json(candidates_path))
     prov = provider_impl or get_provider(provider)
-    return [_finalize(cand, prov.draft(cand)) for cand in crawl.candidates]
+    language = crawl.meta.page_language  # FR-003: snippets carry no language signal
+    return [_finalize(cand, prov.draft(cand, language)) for cand in crawl.candidates]

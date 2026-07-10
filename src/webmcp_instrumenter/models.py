@@ -66,17 +66,19 @@ class Candidate:
 
 @dataclass
 class CrawlMeta:
-    """Page-level crawl metadata (FR-017: origin-trial advertisement)."""
+    """Page-level crawl metadata (FR-017 origin trial, FR-003 page language)."""
 
     page_url: str
     origin_trial_advertised: bool
     origin_trial_source: str | None = None  # "meta" | "header" | None
+    page_language: str | None = None  # BCP-47, e.g. "en", "nl-be"
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "page_url": self.page_url,
             "origin_trial_advertised": self.origin_trial_advertised,
             "origin_trial_source": self.origin_trial_source,
+            "page_language": self.page_language,
         }
 
     @classmethod
@@ -85,6 +87,7 @@ class CrawlMeta:
             page_url=d["page_url"],
             origin_trial_advertised=bool(d["origin_trial_advertised"]),
             origin_trial_source=d.get("origin_trial_source"),
+            page_language=d.get("page_language"),
         )
 
 

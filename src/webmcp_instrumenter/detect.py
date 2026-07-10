@@ -118,10 +118,33 @@ def detect_origin_trial(html: str, headers: dict[str, str]) -> tuple[bool, str |
     return False, None
 
 
+_HTML_LANG = re.compile(
+    r"""<html[^>]*?\blang\s*=\s*["']([^"']+)["']""",
+    re.IGNORECASE,
+)
+
+
+def detect_page_language(html: str, headers: dict[str, str]) -> str | None:
+    """FR-003: the site's primary language, for drafting descriptions.
+
+    Prefers `<html lang>`, falls back to the `Content-Language` response header.
+    Returns a lowercased BCP-47 tag (e.g. "en", "nl-be"), or None if undeterminable.
+    """
+    match = _HTML_LANG.search(html or "")
+    if match:
+        return match.group(1).strip().lower()
+    for key, value in headers.items():
+        if key.lower() == "content-language" and value.strip():
+            # A header may list several; the first is the primary.
+            return value.split(",")[0].strip().lower()
+    return None
+
+
 def build_meta(page_url: str, html: str, headers: dict[str, str]) -> CrawlMeta:
     advertised, source = detect_origin_trial(html, headers)
     return CrawlMeta(
         page_url=page_url,
         origin_trial_advertised=advertised,
         origin_trial_source=source,
+        page_language=detect_page_language(html, headers),
     )

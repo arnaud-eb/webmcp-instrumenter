@@ -18,12 +18,15 @@ from .base import DraftedContract, LLMProvider
 _SYSTEM = """You draft WebMCP tool contracts for AI agents from a page element's HTML.
 Return ONLY a single JSON object (no prose, no code fences) with exactly these keys:
   "tool_name": snake_case, e.g. "submit_contact_form"
-  "description": <=300 chars, agent-facing, in the page's primary language
+  "description": <=300 chars, agent-facing. Write it in the language given as
+               "Page language" in the user message. If that is "unknown", use English.
+               Never infer the language from the HTML snippet — it has no language signal.
   "input_schema": a JSON Schema object {"type":"object","properties":{...},"required":[...]}
   "api": "declarative" for a plain <form>, "imperative" for a custom/button action
   "ambiguous": true if a field's meaning is unclear (e.g. one "name" field that could be
                full name or first/last) — flag rather than guess
-  "note": short reason if ambiguous, else null
+  "note": short reason if ambiguous, else null. ALWAYS write the note in English — it is
+               read by the human reviewer, not by an agent.
 Derive input fields from the element's named inputs. Never invent secrets."""
 
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
@@ -45,7 +48,7 @@ class ClaudeProvider(LLMProvider):
     def __init__(self, config: Config | None = None) -> None:
         self.cfg = config or Config.from_env()
 
-    def draft(self, candidate: Candidate) -> DraftedContract:
+    def draft(self, candidate: Candidate, page_language: str | None = None) -> DraftedContract:
         import anthropic
         from anthropic.types import TextBlock
 
@@ -61,7 +64,9 @@ class ClaudeProvider(LLMProvider):
                 {
                     "role": "user",
                     "content": (
-                        f"Element type: {candidate.type.value}\nHTML:\n{candidate.html_snippet}"
+                        f"Page language: {page_language or 'unknown'}\n"
+                        f"Element type: {candidate.type.value}\n"
+                        f"HTML:\n{candidate.html_snippet}"
                     ),
                 }
             ],

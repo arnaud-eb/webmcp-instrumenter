@@ -1,6 +1,10 @@
 """Fast, browser-free unit tests for the detection logic (US1)."""
 
-from webmcp_instrumenter.detect import build_candidates, detect_origin_trial
+from webmcp_instrumenter.detect import (
+    build_candidates,
+    detect_origin_trial,
+    detect_page_language,
+)
 from webmcp_instrumenter.models import CandidateType, Confidence
 
 URL = "https://example.com/"
@@ -75,3 +79,23 @@ def test_origin_trial_meta_and_header_detection():
     assert detect_origin_trial(html, {}) == (True, "meta")
     assert detect_origin_trial("", {"Origin-Trial": "X"}) == (True, "header")
     assert detect_origin_trial("", {}) == (False, None)
+
+
+def test_page_language_from_html_lang():
+    assert detect_page_language('<html lang="en">', {}) == "en"
+    assert detect_page_language("<html LANG='NL-BE'>", {}) == "nl-be"
+    assert detect_page_language('<html class="x" lang="fr">', {}) == "fr"
+
+
+def test_page_language_falls_back_to_content_language_header():
+    assert detect_page_language("<html>", {"Content-Language": "nl-BE, fr"}) == "nl-be"
+    assert detect_page_language("<html>", {"content-language": "de"}) == "de"
+
+
+def test_html_lang_wins_over_header():
+    assert detect_page_language('<html lang="en">', {"Content-Language": "fr"}) == "en"
+
+
+def test_page_language_none_when_undeterminable():
+    assert detect_page_language("<html>", {}) is None
+    assert detect_page_language("", {}) is None

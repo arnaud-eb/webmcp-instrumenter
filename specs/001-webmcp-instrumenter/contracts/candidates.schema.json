@@ -19,6 +19,10 @@
         "origin_trial_source": {
           "type": ["string", "null"],
           "enum": ["meta", "header", null]
+        },
+        "page_language": {
+          "type": ["string", "null"],
+          "description": "BCP-47 tag from <html lang> or the Content-Language header (e.g. 'en', 'nl-be'). Feeds FR-003 so drafted descriptions are written in the site's primary language. Null when undeterminable."
         }
       }
     },

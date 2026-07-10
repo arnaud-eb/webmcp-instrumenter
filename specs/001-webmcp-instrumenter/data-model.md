@@ -20,10 +20,14 @@ Output of `crawl` (one record per detected form/button). File: `candidates.json`
 **Validation**: truly hidden (`display:none`) elements are excluded entirely (FR-002);
 everything surfaced has a `confidence`. Empty result = empty array, not an error.
 
-**Page-level (FR-017)**: the crawl also reports, once per run, whether the origin advertises
-a WebMCP origin trial — `origin_trial_advertised: boolean` + `source: "meta" | "header" |
-null`. Informational only; never a crawl filter. Carried in a top-level `_meta` object
-alongside the candidates array (see contract).
+**Page-level `_meta`** (one object per crawl run, alongside the candidates array):
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `page_url` | string (URL) | The crawled URL. |
+| `origin_trial_advertised` | boolean | FR-017. Informational only; never a crawl filter. |
+| `origin_trial_source` | `meta` \| `header` \| null | How the trial token was advertised. |
+| `page_language` | string \| null | BCP-47 tag from `<html lang>` or the `Content-Language` header (e.g. `en`, `nl-be`). **Feeds FR-003**: the drafter needs it to write descriptions in the site's primary language, because a bare `<form>` snippet carries no language signal. Null when undeterminable. |
 
 ## Tool contract
 

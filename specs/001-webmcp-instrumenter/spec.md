@@ -198,7 +198,10 @@ in tool definitions.
   never silently dropped — so the human reviewer makes the final call.
 - **FR-003**: The tool MUST draft, for each candidate, a snake_case tool name, an
   agent-facing description under 300 characters in the site's primary language, and an
-  input JSON Schema.
+  input JSON Schema. The site's primary language MUST be captured during crawl and passed
+  to the drafter — an isolated element snippet carries no language signal, so the drafter
+  MUST NOT be left to infer it. When the language is undeterminable, the drafter MUST
+  default to English rather than guess.
 - **FR-004**: The tool MUST flag ambiguous candidates for human review instead of guessing
   a field mapping silently.
 - **FR-005**: The tool MUST provide a human review-and-approval gate, and MUST generate

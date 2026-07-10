@@ -23,6 +23,9 @@ def test_crawl_fixture_detects_flags_and_excludes():
     assert result.meta.origin_trial_advertised is True
     assert result.meta.origin_trial_source == "meta"
 
+    # FR-003: page language captured from <html lang="en"> for the drafter.
+    assert result.meta.page_language == "en"
+
 
 def test_crawl_result_matches_candidates_contract():
     from webmcp_instrumenter.io import validate_against

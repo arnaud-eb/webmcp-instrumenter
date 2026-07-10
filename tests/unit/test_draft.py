@@ -39,10 +39,14 @@ def _drafted(**kw):
 
 
 class FakeProvider(LLMProvider):
+    """Records the page_language it was handed, so we can assert it's threaded through."""
+
     def __init__(self, drafted):
         self._drafted = drafted
+        self.seen_languages: list[str | None] = []
 
-    def draft(self, candidate):
+    def draft(self, candidate, page_language=None):
+        self.seen_languages.append(page_language)
         return self._drafted
 
 
@@ -74,6 +78,35 @@ def test_malformed_output_is_handled_not_crashed():
 def test_low_confidence_candidate_is_flagged():
     c = _finalize(_cand(confidence=Confidence.LOW), _drafted())
     assert "low-confidence" in (c.note or "")
+
+
+def _candidates_payload(page_language):
+    return {
+        "_meta": {
+            "page_url": "https://ex.com/",
+            "origin_trial_advertised": False,
+            "origin_trial_source": None,
+            "page_language": page_language,
+        },
+        "candidates": [_cand().to_dict()],
+    }
+
+
+def test_page_language_is_passed_to_the_provider(tmp_path):
+    """FR-003: a bare element snippet has no language signal, so crawl must supply it."""
+    path = tmp_path / "candidates.json"
+    save_json(path, _candidates_payload("nl-be"))
+    provider = FakeProvider(_drafted())
+    draft_contracts(path, provider_impl=provider)
+    assert provider.seen_languages == ["nl-be"]
+
+
+def test_undeterminable_language_is_passed_as_none(tmp_path):
+    path = tmp_path / "candidates.json"
+    save_json(path, _candidates_payload(None))
+    provider = FakeProvider(_drafted())
+    draft_contracts(path, provider_impl=provider)
+    assert provider.seen_languages == [None]  # provider defaults to English
 
 
 def test_draft_contracts_orchestration(tmp_path):

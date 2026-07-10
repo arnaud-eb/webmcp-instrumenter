@@ -28,8 +28,13 @@ class DraftedContract:
 
 class LLMProvider(ABC):
     @abstractmethod
-    def draft(self, candidate: Candidate) -> DraftedContract:
-        """Draft contract fields for a single candidate."""
+    def draft(self, candidate: Candidate, page_language: str | None = None) -> DraftedContract:
+        """Draft contract fields for a single candidate.
+
+        `page_language` is the crawled page's BCP-47 tag (FR-003). An isolated
+        element snippet carries no language signal, so it must be supplied here
+        rather than inferred; None means "undeterminable — default to English".
+        """
         raise NotImplementedError
 
 

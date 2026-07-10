@@ -16,7 +16,9 @@ worker/node_modules/
 worker/.wrangler/
 
 # Local pipeline output (generated artifacts are not committed)
+# Per-site runs: runs/<host>/{candidates,contracts}.json + runs/<host>/out/
 out/
+runs/
 /candidates.json
 /contracts.json
 *.candidates.json
