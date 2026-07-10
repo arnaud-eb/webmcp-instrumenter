@@ -52,7 +52,10 @@ class ClaudeProvider(LLMProvider):
         client = anthropic.Anthropic(api_key=self.cfg.require_anthropic_key())
         resp = client.messages.create(
             model=self.cfg.anthropic_model,
-            max_tokens=1024,
+            max_tokens=8192,
+            # Schema drafting needs no extended reasoning (research D3). Without this,
+            # models with adaptive thinking on by default emit a leading ThinkingBlock.
+            thinking={"type": "disabled"},
             system=_SYSTEM,
             messages=[
                 {
@@ -63,10 +66,17 @@ class ClaudeProvider(LLMProvider):
                 }
             ],
         )
-        block = resp.content[0]
-        if not isinstance(block, TextBlock):
-            raise RuntimeError(f"unexpected non-text response block: {type(block).__name__}")
-        data = _parse_json(block.text)
+        if resp.stop_reason == "refusal":
+            raise RuntimeError("Claude declined to draft this tool contract")
+        if resp.stop_reason == "max_tokens":
+            raise RuntimeError("draft response truncated — raise max_tokens")
+
+        # `content` is a list of blocks (text / thinking / tool_use). Find the text
+        # block rather than assuming it is first.
+        text = next((b.text for b in resp.content if isinstance(b, TextBlock)), None)
+        if text is None:
+            raise RuntimeError("no text block in Claude response")
+        data = _parse_json(text)
 
         api_val = data.get("api")
         api = (
