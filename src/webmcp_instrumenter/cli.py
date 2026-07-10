@@ -8,6 +8,7 @@ missing optional dependency for one stage never blocks the others.
 from __future__ import annotations
 
 from pathlib import Path
+from urllib.parse import urlparse
 
 import typer
 
@@ -17,14 +18,24 @@ app = typer.Typer(
 )
 
 
+def run_dir_for(url: str) -> Path:
+    """Per-site run directory: `runs/<host>` (`runs/local` when the URL has no host)."""
+    return Path("runs") / (urlparse(url).hostname or "local")
+
+
 @app.command()
 def crawl(
     url: str = typer.Argument(..., help="A single page URL to crawl."),
-    out: Path = typer.Option("candidates.json", "--out", help="Output candidates file."),
+    out: Path | None = typer.Option(
+        None, "--out", help="Output candidates file [default: runs/<host>/candidates.json]."
+    ),
     timeout: float = typer.Option(None, "--timeout", help="Render timeout (seconds)."),
 ) -> None:
     """US1: render a URL and detect candidate WebMCP actions."""
     from .crawl import crawl_url
+
+    if out is None:
+        out = run_dir_for(url) / "candidates.json"
 
     result = crawl_url(url, timeout_s=timeout)
     from .io import save_json, validate_against
@@ -44,11 +55,16 @@ def crawl(
 @app.command()
 def draft(
     candidates: Path = typer.Argument(..., help="candidates.json from `crawl`."),
-    out: Path = typer.Option("contracts.json", "--out", help="Output contracts file."),
+    out: Path | None = typer.Option(
+        None, "--out", help="Output contracts file [default: beside the input file]."
+    ),
     provider: str = typer.Option("claude", "--provider", help="LLM provider."),
 ) -> None:
     """US2: draft a tool contract per candidate (human-edited before generate)."""
     from .draft import draft_contracts
+
+    if out is None:
+        out = candidates.parent / "contracts.json"
 
     contracts = draft_contracts(candidates, provider=provider)
     from .io import save_json, validate_against
@@ -66,10 +82,15 @@ def draft(
 @app.command()
 def generate(
     contracts: Path = typer.Argument(..., help="contracts.json (approved) from `draft`."),
-    out_dir: Path = typer.Option("out", "--out-dir", help="Output directory."),
+    out_dir: Path | None = typer.Option(
+        None, "--out-dir", help="Output directory [default: <input-dir>/out]."
+    ),
 ) -> None:
     """US3: emit code for APPROVED contracts only (human gate)."""
     from .generate import generate as run_generate
+
+    if out_dir is None:
+        out_dir = contracts.parent / "out"
 
     summary = run_generate(contracts, out_dir)
     if summary.approved == 0:
