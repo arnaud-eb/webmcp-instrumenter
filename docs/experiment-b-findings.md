@@ -71,6 +71,21 @@ faithfully *reads existing annotations* — not that it can *construct* a contra
 un-annotated markup. The genuine drafter test is a real, uninstrumented site. (Detail in
 `docs/reviewing-contracts.md`.)
 
+## Finding 4 — Booking widgets are SPAs that render after `load`
+
+`salonkee.lu` (a SaaS salon-booking platform) serves its widget as an Angular single-page
+app. Crawling with Playwright's `wait_until="load"` and extracting immediately found **2**
+candidates — the static shell's Login button and a country selector. The actual service /
+appointment UI hydrates *after* the load event: waiting for network idle instead surfaced
+**88** buttons (including `make-appointment-button` and the per-service buttons).
+
+This is a crawl-methodology gap, distinct from Finding 1: the actions here are real
+same-origin `<button>`s the vendor *could* instrument — the crawler just extracted too
+early. Any client-rendered target (which is most modern booking/checkout flows) hits this.
+Note salonkee is again a *vendor* platform, reinforcing Finding 1's vendor-not-SMB thesis:
+crawled directly it's same-origin, but embedded on a salon's own site it would be a
+cross-origin iframe like Zenchef.
+
 ---
 
 ## Consequences for the tool (tracked as spec changes)
@@ -81,3 +96,6 @@ un-annotated markup. The genuine drafter test is a real, uninstrumented site. (D
   silently missing the form. (FR-018; implemented after this finding was recorded.)
 - The category-3 pass on `gct.lu` should be re-read once iframe-descent lands — the newsletter
   form we first drafted against was **not** the page's real action.
+- **Crawl must wait for SPAs to settle before extracting** — wait for network idle (bounded,
+  best-effort) after `load`, or client-rendered pages report only their shell. (FR-019;
+  implemented after Finding 4.)

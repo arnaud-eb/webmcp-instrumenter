@@ -239,6 +239,14 @@ in tool definitions.
   control — only the embedding vendor could add it). Non-owner-instrumentable candidates
   MUST be surfaced as findings (so the run reports "the primary action is a third-party
   widget you cannot instrument") and MUST never be approved for generation on that site.
+- **FR-019**: Crawl MUST wait for client-rendered pages to finish rendering before
+  extracting candidates. Many target actions (booking/checkout widgets) are single-page
+  apps that hydrate *after* the browser `load` event, so extracting at `load` captures
+  only the static shell and misses the real actions. The crawl MUST additionally wait for
+  the page to reach network idle, bounded by a timeout; if idle is never reached (pages
+  with analytics beacons, long-polling, or websockets never go idle), the crawl MUST
+  proceed with whatever has rendered rather than fail — settling is best-effort, never a
+  hard gate.
 
 ### Key Entities
 

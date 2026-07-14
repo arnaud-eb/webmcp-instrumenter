@@ -75,6 +75,13 @@ def crawl_url(url: str, timeout_s: float | None = None) -> CrawlResult:
                 response = page.goto(url, wait_until="load", timeout=timeout_ms)
             except PlaywrightError as exc:
                 raise RuntimeError(f"crawl: could not render {url!r}: {exc}") from exc
+            # FR-019: SPAs hydrate after `load`; wait for the page to settle so we extract
+            # the rendered app, not just its shell. Best-effort — pages that never go idle
+            # (analytics beacons, long-polling) just fall through with whatever rendered.
+            try:
+                page.wait_for_load_state("networkidle", timeout=timeout_ms)
+            except PlaywrightError:
+                pass
             html = page.content()
             headers = dict(response.headers) if response is not None else {}
 
