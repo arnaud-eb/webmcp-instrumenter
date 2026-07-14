@@ -13,9 +13,11 @@ Output of `crawl` (one record per detected form/button). File: `candidates.json`
 | `id` | string | Stable within a crawl (e.g. `c1`, `c2`). |
 | `type` | enum: `form` \| `button` | Kind of detected action. |
 | `confidence` | enum: `high` \| `low` | `low` = cosmetic/ambiguous, surfaced flagged (D7). |
-| `page_url` | string (URL) | Where it was found (single URL per run — D6). |
+| `page_url` | string (URL) | The crawled top URL (single URL per run — D6). |
 | `html_snippet` | string | Raw outerHTML of the element. |
 | `visible` | boolean | `false` for elements present but not `display:none`-hidden. |
+| `frame_url` | string (URL) | FR-018: the frame the element lives in (== `page_url` for the main document). |
+| `owner_instrumentable` | boolean | FR-018: `false` when the element is in a **cross-origin** frame the site owner can't instrument (only the embedding vendor could). Never approve these. |
 
 **Validation**: truly hidden (`display:none`) elements are excluded entirely (FR-002);
 everything surfaced has a `confidence`. Empty result = empty array, not an error.
@@ -28,6 +30,7 @@ everything surfaced has a `confidence`. Empty result = empty array, not an error
 | `origin_trial_advertised` | boolean | FR-017. Informational only; never a crawl filter. |
 | `origin_trial_source` | `meta` \| `header` \| null | How the trial token was advertised. |
 | `page_language` | string \| null | BCP-47 tag from `<html lang>` or the `Content-Language` header (e.g. `en`, `nl-be`). **Feeds FR-003**: the drafter needs it to write descriptions in the site's primary language, because a bare `<form>` snippet carries no language signal. Null when undeterminable. |
+| `iframes` | array of {url, cross_origin} | FR-018: frames found below the top document. A `cross_origin: true` entry that contained candidates is the "primary action is a third-party widget" finding. |
 
 ## Tool contract
 

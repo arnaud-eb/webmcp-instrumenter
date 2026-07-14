@@ -97,9 +97,28 @@ def build_candidates(raw_elements: list[dict[str, Any]], page_url: str) -> list[
                 page_url=page_url,
                 html_snippet=raw.get("outerHTML", ""),
                 visible=bool(raw.get("visible", True)),
+                frame_url=raw.get("frameUrl", page_url),
+                # FR-018: a cross-origin frame is not owner-instrumentable.
+                owner_instrumentable=not bool(raw.get("crossOrigin", False)),
             )
         )
     return candidates
+
+
+def is_cross_origin(base_url: str, frame_url: str) -> bool:
+    """FR-018: does `frame_url` sit on a different origin than `base_url`?
+
+    Frames with no real origin (about:blank, empty, data:, srcdoc) are treated as
+    same-origin — they are part of the owner's own page.
+    """
+    from urllib.parse import urlparse
+
+    if not frame_url or frame_url.startswith(("about:", "data:", "blob:")):
+        return False
+    b, f = urlparse(base_url), urlparse(frame_url)
+    if not f.hostname:  # e.g. file:// frames — same document tree
+        return False
+    return (b.scheme, b.hostname, b.port) != (f.scheme, f.hostname, f.port)
 
 
 _META_ORIGIN_TRIAL = re.compile(

@@ -231,6 +231,14 @@ in tool definitions.
   already advertises a WebMCP origin trial (via an `origin-trial` meta tag or an
   `Origin-Trial` response header). This signal is informational only and MUST NOT be used
   to include or exclude a site from crawling.
+- **FR-018**: Crawl MUST descend into `<iframe>`s, not just the top document — real SMB
+  actions (reservations, bookings, checkout) are frequently embedded third-party widgets.
+  Each candidate MUST record the frame it was found in and whether the **site owner can
+  instrument it**: a candidate in a **cross-origin** frame is NOT owner-instrumentable
+  (WebMCP registration only runs in the frame's own origin, which the site owner does not
+  control — only the embedding vendor could add it). Non-owner-instrumentable candidates
+  MUST be surfaced as findings (so the run reports "the primary action is a third-party
+  widget you cannot instrument") and MUST never be approved for generation on that site.
 
 ### Key Entities
 

@@ -68,6 +68,13 @@ def _finalize(candidate: Candidate, drafted: DraftedContract) -> Contract:
     if candidate.confidence.value == "low":
         notes.append("low-confidence candidate")
 
+    # FR-018: a cross-origin third-party widget can't be instrumented by the site owner.
+    if not candidate.owner_instrumentable:
+        notes.append(
+            "NOT owner-instrumentable — cross-origin third-party widget "
+            f"({candidate.frame_url}); only the embedding vendor can add WebMCP. Do not approve."
+        )
+
     return Contract(
         candidate_id=candidate.id,
         tool_name=name,

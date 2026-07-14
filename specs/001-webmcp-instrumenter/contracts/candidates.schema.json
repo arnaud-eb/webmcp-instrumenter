@@ -23,6 +23,22 @@
         "page_language": {
           "type": ["string", "null"],
           "description": "BCP-47 tag from <html lang> or the Content-Language header (e.g. 'en', 'nl-be'). Feeds FR-003 so drafted descriptions are written in the site's primary language. Null when undeterminable."
+        },
+        "iframes": {
+          "type": "array",
+          "description": "FR-018: frames encountered below the top document.",
+          "items": {
+            "type": "object",
+            "required": ["url", "cross_origin"],
+            "additionalProperties": false,
+            "properties": {
+              "url": { "type": "string" },
+              "cross_origin": {
+                "type": "boolean",
+                "description": "True if the frame's origin differs from the crawled origin — the site owner cannot instrument it."
+              }
+            }
+          }
         }
       }
     },
@@ -30,7 +46,10 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "type", "confidence", "page_url", "html_snippet", "visible"],
+        "required": [
+          "id", "type", "confidence", "page_url", "html_snippet", "visible",
+          "frame_url", "owner_instrumentable"
+        ],
         "additionalProperties": false,
         "properties": {
           "id": { "type": "string" },
@@ -38,7 +57,15 @@
           "confidence": { "type": "string", "enum": ["high", "low"] },
           "page_url": { "type": "string", "format": "uri" },
           "html_snippet": { "type": "string" },
-          "visible": { "type": "boolean" }
+          "visible": { "type": "boolean" },
+          "frame_url": {
+            "type": "string",
+            "description": "FR-018: URL of the frame the element was found in (equals page_url for the top document)."
+          },
+          "owner_instrumentable": {
+            "type": "boolean",
+            "description": "FR-018: false when the candidate lives in a cross-origin frame the site owner cannot instrument. Such candidates must never be approved for generation."
+          }
         }
       }
     }

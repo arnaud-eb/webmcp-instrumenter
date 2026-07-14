@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Iframe site</title>
+  </head>
+  <body>
+    <!-- A form in the top document. -->
+    <form id="newsletter">
+      <input type="email" name="email" />
+      <button type="submit">Subscribe</button>
+    </form>
+
+    <!-- FR-018: the primary action lives inside an iframe, like a booking widget.
+         srcdoc keeps it same-origin so the crawl can descend and read it. -->
+    <iframe
+      srcdoc="
+        <form id='booking'>
+          <input type='date' name='date' />
+          <input type='number' name='party_size' />
+          <button type='submit'>Reserve a table</button>
+        </form>
+      "
+    ></iframe>
+  </body>
+</html>

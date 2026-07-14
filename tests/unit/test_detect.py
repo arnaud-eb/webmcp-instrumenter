@@ -4,6 +4,7 @@ from webmcp_instrumenter.detect import (
     build_candidates,
     detect_origin_trial,
     detect_page_language,
+    is_cross_origin,
 )
 from webmcp_instrumenter.models import CandidateType, Confidence
 
@@ -99,3 +100,21 @@ def test_html_lang_wins_over_header():
 def test_page_language_none_when_undeterminable():
     assert detect_page_language("<html>", {}) is None
     assert detect_page_language("", {}) is None
+
+
+def test_is_cross_origin():
+    base = "https://gct.lu/reservations/"
+    assert is_cross_origin(base, "https://bookings.zenchef.com/results") is True
+    assert is_cross_origin(base, "https://gct.lu/other") is False  # same origin
+    assert is_cross_origin(base, "https://sub.gct.lu/x") is True  # different host
+    assert is_cross_origin(base, "about:srcdoc") is False  # part of the page
+    assert is_cross_origin(base, "") is False
+
+
+def test_owner_instrumentable_reflects_cross_origin():
+    same = _form(frameUrl="https://gct.lu/", crossOrigin=False)
+    third = _form(frameUrl="https://bookings.zenchef.com/", crossOrigin=True)
+    cands = build_candidates([same, third], "https://gct.lu/")
+    assert cands[0].owner_instrumentable is True
+    assert cands[1].owner_instrumentable is False
+    assert cands[1].frame_url == "https://bookings.zenchef.com/"

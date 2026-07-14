@@ -7,7 +7,7 @@ element" dicts; all classification lives in detect.py so it stays testable.
 from __future__ import annotations
 
 from .config import Config
-from .detect import build_candidates, build_meta
+from .detect import build_candidates, build_meta, is_cross_origin
 from .models import CrawlResult
 
 # Collect forms and standalone buttons with the signals detect.py needs.
@@ -77,10 +77,28 @@ def crawl_url(url: str, timeout_s: float | None = None) -> CrawlResult:
                 raise RuntimeError(f"crawl: could not render {url!r}: {exc}") from exc
             html = page.content()
             headers = dict(response.headers) if response is not None else {}
-            raw_elements = page.evaluate(_EXTRACT_JS)
+
+            # FR-018: extract from every frame, not just the top document. Real SMB
+            # actions are often embedded third-party widgets in (cross-origin) iframes.
+            raw_elements: list[dict] = []
+            iframes: list[dict] = []
+            for frame in page.frames:
+                frame_url = frame.url or url
+                cross = is_cross_origin(url, frame_url)
+                if frame.parent_frame is not None:  # not the top document
+                    iframes.append({"url": frame_url, "cross_origin": cross})
+                try:
+                    frame_raw = frame.evaluate(_EXTRACT_JS)
+                except PlaywrightError:
+                    continue  # detached / not-yet-loaded frame — skip
+                for r in frame_raw:
+                    r["frameUrl"] = frame_url
+                    r["crossOrigin"] = cross
+                raw_elements.extend(frame_raw)
         finally:
             browser.close()
 
     candidates = build_candidates(raw_elements, url)
     meta = build_meta(url, html, headers)
+    meta.iframes = iframes
     return CrawlResult(meta=meta, candidates=candidates)

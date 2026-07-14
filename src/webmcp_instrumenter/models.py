@@ -41,6 +41,8 @@ class Candidate:
     page_url: str
     html_snippet: str
     visible: bool
+    frame_url: str = ""  # FR-018: the frame it lives in (== page_url for the top document)
+    owner_instrumentable: bool = True  # FR-018: false for cross-origin third-party frames
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -50,6 +52,8 @@ class Candidate:
             "page_url": self.page_url,
             "html_snippet": self.html_snippet,
             "visible": self.visible,
+            "frame_url": self.frame_url or self.page_url,
+            "owner_instrumentable": self.owner_instrumentable,
         }
 
     @classmethod
@@ -61,6 +65,8 @@ class Candidate:
             page_url=d["page_url"],
             html_snippet=d["html_snippet"],
             visible=bool(d["visible"]),
+            frame_url=d.get("frame_url", d["page_url"]),
+            owner_instrumentable=bool(d.get("owner_instrumentable", True)),
         )
 
 
@@ -72,6 +78,7 @@ class CrawlMeta:
     origin_trial_advertised: bool
     origin_trial_source: str | None = None  # "meta" | "header" | None
     page_language: str | None = None  # BCP-47, e.g. "en", "nl-be"
+    iframes: list[dict[str, Any]] = field(default_factory=list)  # FR-018: {url, cross_origin}
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -79,6 +86,7 @@ class CrawlMeta:
             "origin_trial_advertised": self.origin_trial_advertised,
             "origin_trial_source": self.origin_trial_source,
             "page_language": self.page_language,
+            "iframes": self.iframes,
         }
 
     @classmethod
@@ -88,6 +96,7 @@ class CrawlMeta:
             origin_trial_advertised=bool(d["origin_trial_advertised"]),
             origin_trial_source=d.get("origin_trial_source"),
             page_language=d.get("page_language"),
+            iframes=d.get("iframes", []),
         )
 
 

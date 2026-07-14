@@ -4,7 +4,8 @@ from pathlib import Path
 
 from webmcp_instrumenter.crawl import crawl_url
 
-FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "sample_site.html"
+FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
+FIXTURE = FIXTURES / "sample_site.html"
 
 
 def test_crawl_fixture_detects_flags_and_excludes():
@@ -25,6 +26,19 @@ def test_crawl_fixture_detects_flags_and_excludes():
 
     # FR-003: page language captured from <html lang="en"> for the drafter.
     assert result.meta.page_language == "en"
+
+
+def test_crawl_descends_into_iframes():
+    # FR-018: the reservation form lives in an iframe, not the top document.
+    result = crawl_url((FIXTURES / "iframe_site.html").as_uri())
+
+    snippets = " ".join(c.html_snippet for c in result.candidates)
+    assert "newsletter" in snippets  # top-document form
+    assert "booking" in snippets  # form found *inside* the iframe
+
+    # The iframe was recorded in _meta; srcdoc is same-origin so it's instrumentable.
+    assert len(result.meta.iframes) == 1
+    assert all(c.owner_instrumentable for c in result.candidates)
 
 
 def test_crawl_result_matches_candidates_contract():

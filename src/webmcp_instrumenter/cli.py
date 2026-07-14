@@ -50,6 +50,13 @@ def crawl(
         typer.echo(
             f"  note: origin advertises a WebMCP origin trial ({result.meta.origin_trial_source})"
         )
+    n_third_party = sum(1 for c in result.candidates if not c.owner_instrumentable)
+    if n_third_party:
+        hosts = sorted({f["url"] for f in result.meta.iframes if f["cross_origin"]})
+        typer.echo(
+            f"  ⚠ {n_third_party} candidate(s) in a cross-origin third-party widget you "
+            f"cannot instrument (only the vendor can): {', '.join(hosts)}"
+        )
 
 
 @app.command()
