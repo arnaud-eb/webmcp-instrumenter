@@ -12,20 +12,28 @@ Every contract comes out of `draft` as `needs_review`. `draft` never auto-approv
 
 This is the part that's easy to forget three weeks into the measurement window.
 
-| Site category | Do you own it? | Does `generate` ever run? | So what is review *for*? |
-|---|---|---|---|
+| Site category | Do you own it? | Does `generate` run? | So what is review *for*? |
+| --- | --- | --- | --- |
 | **1.** Your Shopify Partners dev store | **Yes** | **Yes** | **Ship quality.** This becomes live code on a real origin. Approve only what you'd be happy for a stranger's AI agent to invoke. |
-| **2.** WebMCP demo apps (`webmcp-tools`) | No | No | **Benchmark.** Compare your drafted contract against the site's *own* WebMCP annotations. Did you name it well? Find every parameter? |
+| **2.** WebMCP demo apps (`webmcp-tools`) | No | No | **Benchmark.** Compare your draft against the site's *own* WebMCP annotations. Named it well? Found every parameter? |
 | **3.** Real public sites | No | No | **Detector QA.** Judge whether crawl+draft produced something sensible from messy markup you didn't author. |
 
 For categories 2 and 3 you change nothing and deploy nothing — the contract is an artifact of
 the experiment, not a deliverable. **A contract you'd reject is still a useful result:** it
 tells you what instrumenting that site would actually require.
 
-> **You cannot instrument a site you don't own.** `navigator.modelContext.registerTool()`
-> only registers tools for the page whose JS context it runs in. The snippet has to be on
-> their page, which means the owner deploys it. This is a hard constraint of WebMCP, not a
-> policy we chose. Never run `generate` for categories 2 and 3.
+> **⚠️ Already-instrumented sites flatter the drafter.** The WebMCP demo apps (category 2)
+> already carry `toolname` / `tooldescription` / `toolparamdescription` attributes in their
+> markup. Those attributes are in the HTML the drafter sees, so a near-perfect draft there
+> proves only that the drafter *faithfully reads existing annotations* — not that it can
+> *construct* a contract from scratch. The genuine test of the drafter is **category 3**:
+> real, uninstrumented markup with no `toolname` attributes to copy. Don't let a category-2
+> pass raise your confidence in drafting quality on uninstrumented sites.
+
+**You cannot instrument a site you don't own.** `navigator.modelContext.registerTool()` only
+registers tools for the page whose JS context it runs in. The snippet has to be on their page,
+which means the owner deploys it. This is a hard constraint of WebMCP, not a policy we chose.
+Never run `generate` for categories 2 and 3.
 
 ---
 
@@ -45,9 +53,10 @@ tells you what instrumenting that site would actually require.
 
 ---
 
-## The four judgment calls you will actually hit
+## The judgment calls you will actually hit
 
 ### 1. A search form (arrives flagged `low`)
+
 Ask one question: **does submitting it navigate to a real results page, or does it filter a
 dropdown in place?**
 
@@ -58,29 +67,43 @@ Markup alone can't tell these apart (both use `role="search"`), which is why the
 refuses to decide and hands it to you flagged rather than dropping it (clarify decision D7).
 
 ### 2. A cookie / consent banner (arrives flagged `low`)
+
 **Always reject.** Accepting cookies is a consent decision on the end user's behalf. It is
 not an action an agent should ever take, and registering it just adds noise to the tool list.
 
 ### 3. An empty `input_schema` on a button
+
 ```json
 "properties": {}, "required": []
 ```
+
 This is **not** a drafting failure. It's an accurate report that **the markup exposed no
 parameters** — a bare `<button>` has no named inputs to derive them from.
 
 **Never approve as-is.** An agent calling `add_to_cart` with no parameters cannot say *which*
 product. Either:
+
 - you own the site → add the parameters by hand and write the imperative `execute()` handler; or
 - you don't → reject it, and record that this action can't be instrumented from markup alone.
   That finding is worth more than the contract was.
 
 ### 4. An ambiguous field (the `note` will tell you)
+
 Draft flags things like *"'name' doesn't specify full name or first/last."* Resolve it in the
 parameter description. Google's own bistro demo does exactly this:
 
 > `name` → *"Customer's full name (min 2 chars)"*
 
 Be that explicit. The agent has only the description to go on.
+
+### 5. A misleading `tool_name` (read it, don't skim it)
+
+The drafter builds names from the site's own words, and snake_case can collide with brands.
+A real case: a `<button title="Chat with our AI Assistant">` produced `open_ai_chat_assistant`
+— tokens `open / ai / chat / assistant` ("open the AI chat assistant"), **not** "OpenAI". The
+derivation was innocent, but the name reads like a vendor integration. Rename anything whose
+name could be misread (e.g. `toggle_chat_assistant`), and reject non-actions like chat toggles
+outright.
 
 ---
 
@@ -89,10 +112,10 @@ Be that explicit. The agent has only the description to go on.
 Declarative is only *possible* when the browser can already see **both** the parameters and
 the action. A `<form>` provides both for free; a `<button>` provides neither.
 
-| | `declarative` | `imperative` |
-|---|---|---|
+| Aspect | `declarative` | `imperative` |
+| --- | --- | --- |
 | **Use when** | The action *is* a form submit | No form, no named inputs, or custom logic |
-| **How** | `toolname`/`tooldescription` on the `<form>`, `toolparamdescription` on each input | `navigator.modelContext.registerTool({...})` with an `execute()` you write |
+| **How** | `toolname`/`tooldescription` on the `<form>`, `toolparamdescription` on inputs | `navigator.modelContext.registerTool({...})` with an `execute()` you write |
 | **Parameters** | Derived by the browser from named inputs | You declare `inputSchema` explicitly |
 | **JavaScript** | None | Yes — you write the handler |
 
@@ -123,7 +146,7 @@ Google's `french-bistro` demo, recovered from its declarative attributes — a g
 draft against:
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | tool name | `book_table_le_petit_bistro` |
 | description | *Initiates a dining reservation request at Le Petit Bistro. Accepts customer details, timing, and seating preferences.* |
 | required | `name`, `phone`, `date`, `time`, `guests` |
