@@ -99,3 +99,10 @@ cross-origin iframe like Zenchef.
 - **Crawl must wait for SPAs to settle before extracting** — wait for network idle (bounded,
   best-effort) after `load`, or client-rendered pages report only their shell. (FR-019;
   implemented after Finding 4.)
+- **Origin-trial detection must decode the token, not just spot the meta tag.** salonkee's page
+  carries an `origin-trial` token — but decoding it shows `feature:
+  DisableThirdPartyStoragePartitioning3` (a Google/reCAPTCHA trial), not WebMCP. Reporting mere
+  token *presence* as "already uses WebMCP" is a false positive that would corrupt the go/no-go
+  read on any site embedding Google widgets. The tool now decodes each token's `feature` and
+  only claims WebMCP on a match. (FR-017 tightened; the decoder must skip the 64-byte signature,
+  whose random bytes can contain `{`/`}`.)

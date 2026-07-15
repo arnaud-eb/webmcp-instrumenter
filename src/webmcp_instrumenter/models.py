@@ -75,8 +75,10 @@ class CrawlMeta:
     """Page-level crawl metadata (FR-017 origin trial, FR-003 page language)."""
 
     page_url: str
-    origin_trial_advertised: bool
+    origin_trial_advertised: bool  # FR-017: ANY origin-trial token present (not necessarily WebMCP)
     origin_trial_source: str | None = None  # "meta" | "header" | None
+    origin_trial_features: list[str] = field(default_factory=list)  # FR-017: decoded feature names
+    origin_trial_webmcp: bool = False  # FR-017: a decoded feature identifies WebMCP
     page_language: str | None = None  # BCP-47, e.g. "en", "nl-be"
     iframes: list[dict[str, Any]] = field(default_factory=list)  # FR-018: {url, cross_origin}
 
@@ -85,6 +87,8 @@ class CrawlMeta:
             "page_url": self.page_url,
             "origin_trial_advertised": self.origin_trial_advertised,
             "origin_trial_source": self.origin_trial_source,
+            "origin_trial_features": self.origin_trial_features,
+            "origin_trial_webmcp": self.origin_trial_webmcp,
             "page_language": self.page_language,
             "iframes": self.iframes,
         }
@@ -95,6 +99,8 @@ class CrawlMeta:
             page_url=d["page_url"],
             origin_trial_advertised=bool(d["origin_trial_advertised"]),
             origin_trial_source=d.get("origin_trial_source"),
+            origin_trial_features=d.get("origin_trial_features", []),
+            origin_trial_webmcp=bool(d.get("origin_trial_webmcp", False)),
             page_language=d.get("page_language"),
             iframes=d.get("iframes", []),
         )

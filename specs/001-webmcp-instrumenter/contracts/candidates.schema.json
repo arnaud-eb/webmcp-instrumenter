@@ -14,11 +14,20 @@
         "page_url": { "type": "string", "format": "uri" },
         "origin_trial_advertised": {
           "type": "boolean",
-          "description": "FR-017: does the origin advertise a WebMCP origin trial? Informational only."
+          "description": "FR-017: page carries ANY origin-trial token (not necessarily WebMCP). Informational only."
         },
         "origin_trial_source": {
           "type": ["string", "null"],
           "enum": ["meta", "header", null]
+        },
+        "origin_trial_features": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "FR-017: decoded `feature` names from the token(s). Disambiguates third-party trials (reCAPTCHA/analytics) from WebMCP."
+        },
+        "origin_trial_webmcp": {
+          "type": "boolean",
+          "description": "FR-017: true only when a decoded feature identifies WebMCP — the Experiment-B-relevant signal."
         },
         "page_language": {
           "type": ["string", "null"],

@@ -227,10 +227,16 @@ in tool definitions.
   manual paste-in performed by the operator.
 - **FR-016**: The logging destination MUST remain reachable for the full multi-week
   measurement window without silently dropping events.
-- **FR-017**: During crawl, the tool SHOULD detect and report whether the target origin
-  already advertises a WebMCP origin trial (via an `origin-trial` meta tag or an
-  `Origin-Trial` response header). This signal is informational only and MUST NOT be used
-  to include or exclude a site from crawling.
+- **FR-017**: During crawl, the tool SHOULD detect and report origin-trial tokens the page
+  carries (via an `origin-trial` meta tag or an `Origin-Trial` response header). Origin-trial
+  tokens are **feature-scoped**: a page that embeds Google/analytics/reCAPTCHA widgets often
+  carries a token for an *unrelated* Chrome trial (e.g. third-party storage partitioning), so
+  the mere presence of a token MUST NOT be reported as a WebMCP trial. The tool MUST decode
+  each token, read its `feature` field, and only report a **WebMCP** origin trial when a
+  decoded feature identifies WebMCP; other features MUST be reported by name and explicitly
+  marked as not WebMCP. Undecodable/malformed tokens are reported as "feature undetermined".
+  This whole signal is informational only and MUST NOT be used to include or exclude a site
+  from crawling.
 - **FR-018**: Crawl MUST descend into `<iframe>`s, not just the top document — real SMB
   actions (reservations, bookings, checkout) are frequently embedded third-party widgets.
   Each candidate MUST record the frame it was found in and whether the **site owner can

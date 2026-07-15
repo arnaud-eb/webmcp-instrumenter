@@ -20,9 +20,11 @@ def test_crawl_fixture_detects_flags_and_excludes():
     assert len(highs) == 2  # contact form + add-to-cart button
     assert len(lows) == 2  # search widget + cookie button
 
-    # FR-017: origin trial advertised via meta tag.
+    # FR-017: an origin-trial meta tag is present, but the fixture's token is not a real
+    # (decodable, WebMCP) token — advertised, yet not flagged as WebMCP.
     assert result.meta.origin_trial_advertised is True
     assert result.meta.origin_trial_source == "meta"
+    assert result.meta.origin_trial_webmcp is False
 
     # FR-003: page language captured from <html lang="en"> for the drafter.
     assert result.meta.page_language == "en"

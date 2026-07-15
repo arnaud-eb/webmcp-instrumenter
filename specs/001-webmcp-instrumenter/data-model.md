@@ -27,8 +27,10 @@ everything surfaced has a `confidence`. Empty result = empty array, not an error
 | Field | Type | Notes |
 |-------|------|-------|
 | `page_url` | string (URL) | The crawled URL. |
-| `origin_trial_advertised` | boolean | FR-017. Informational only; never a crawl filter. |
+| `origin_trial_advertised` | boolean | FR-017: page carries **any** origin-trial token (not necessarily WebMCP). Informational only; never a crawl filter. |
 | `origin_trial_source` | `meta` \| `header` \| null | How the trial token was advertised. |
+| `origin_trial_features` | array of string | FR-017: decoded `feature` names from the token(s). Third-party widgets (reCAPTCHA, analytics) inject tokens for unrelated features, so this disambiguates. Empty if no token or none decoded. |
+| `origin_trial_webmcp` | boolean | FR-017: true only when a decoded feature identifies **WebMCP** — the Experiment-B-relevant signal. A token present with `webmcp: false` means the trial belongs to some other Chrome feature. |
 | `page_language` | string \| null | BCP-47 tag from `<html lang>` or the `Content-Language` header (e.g. `en`, `nl-be`). **Feeds FR-003**: the drafter needs it to write descriptions in the site's primary language, because a bare `<form>` snippet carries no language signal. Null when undeterminable. |
 | `iframes` | array of {url, cross_origin} | FR-018: frames found below the top document. A `cross_origin: true` entry that contained candidates is the "primary action is a third-party widget" finding. |
 

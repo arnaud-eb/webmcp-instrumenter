@@ -11,6 +11,8 @@ Rules (spec FR-002, clarify decision D7):
 
 from __future__ import annotations
 
+import base64
+import json
 import re
 from typing import Any
 
@@ -121,20 +123,80 @@ def is_cross_origin(base_url: str, frame_url: str) -> bool:
     return (b.scheme, b.hostname, b.port) != (f.scheme, f.hostname, f.port)
 
 
-_META_ORIGIN_TRIAL = re.compile(
-    r"""<meta[^>]+http-equiv\s*=\s*["']origin-trial["']""",
-    re.IGNORECASE,
-)
+_META_TAG = re.compile(r"<meta\b[^>]*>", re.IGNORECASE)
+_HTTP_EQUIV_OT = re.compile(r"""http-equiv\s*=\s*["']origin-trial["']""", re.IGNORECASE)
+_META_CONTENT = re.compile(r"""content\s*=\s*["']([^"']*)["']""", re.IGNORECASE)
 
 
-def detect_origin_trial(html: str, headers: dict[str, str]) -> tuple[bool, str | None]:
-    """FR-017: does the page advertise a WebMCP origin trial? Informational only."""
-    if _META_ORIGIN_TRIAL.search(html or ""):
-        return True, "meta"
-    # Header names are case-insensitive.
-    if any(k.lower() == "origin-trial" for k in headers):
-        return True, "header"
-    return False, None
+def _origin_trial_tokens(html: str, headers: dict[str, str]) -> tuple[list[str], str | None]:
+    """Collect raw origin-trial tokens from meta tags and the Origin-Trial header."""
+    meta_tokens: list[str] = []
+    for tag in _META_TAG.findall(html or ""):  # attribute order varies — scan each tag
+        if _HTTP_EQUIV_OT.search(tag):
+            m = _META_CONTENT.search(tag)
+            if m and m.group(1).strip():
+                meta_tokens.append(m.group(1).strip())
+    header_tokens: list[str] = []
+    for key, value in headers.items():  # header names are case-insensitive
+        if key.lower() == "origin-trial" and value.strip():
+            header_tokens.extend(t.strip() for t in value.split(",") if t.strip())
+    source = "meta" if meta_tokens else "header" if header_tokens else None
+    return meta_tokens + header_tokens, source
+
+
+_OT_PAYLOAD_OFFSET = 69  # version(1) + Ed25519 signature(64) + payload length(4, big-endian)
+
+
+def _decode_ot_feature(token: str) -> str | None:
+    """Pull the `feature` name out of an origin-trial token, or None if undecodable.
+
+    Token layout (trial token v2/v3): a version byte, a 64-byte signature, a 4-byte
+    big-endian payload length, then the JSON payload. We must skip past the signature before
+    hunting for the JSON — the random signature bytes can themselves contain `{`/`}`, so a
+    naive brace search on the whole buffer latches onto the signature, not the payload.
+    """
+    try:
+        raw = base64.b64decode(token)
+    except (ValueError, TypeError):
+        return None
+    if len(raw) < _OT_PAYLOAD_OFFSET:
+        return None
+    length = int.from_bytes(raw[65:_OT_PAYLOAD_OFFSET], "big")
+    tail = raw[_OT_PAYLOAD_OFFSET:]
+    body = tail[:length] if 0 < length <= len(tail) else tail
+    start, end = body.find(b"{"), body.rfind(b"}")
+    if start == -1 or end <= start:
+        return None
+    try:
+        payload = json.loads(body[start : end + 1].decode("utf-8", "replace"))
+    except (ValueError, UnicodeDecodeError):
+        return None
+    feature = payload.get("feature") if isinstance(payload, dict) else None
+    return feature if isinstance(feature, str) and feature else None
+
+
+def _is_webmcp_feature(feature: str) -> bool:
+    # Heuristic: Chrome hasn't published the exact registered feature string, so match the
+    # obvious identifiers. Tighten to an exact string once confirmed. (FR-017)
+    f = feature.lower()
+    return "webmcp" in f or "modelcontext" in f
+
+
+def detect_origin_trial(
+    html: str, headers: dict[str, str]
+) -> tuple[bool, str | None, list[str], bool]:
+    """FR-017: report origin-trial tokens the page carries — decoded, not just present.
+
+    Tokens are feature-scoped; an embedded reCAPTCHA/analytics widget injects a token for an
+    unrelated Chrome trial. Returns (advertised, source, feature_names, is_webmcp). WebMCP is
+    asserted only when a decoded feature identifies it; unrelated features are reported by name.
+    """
+    tokens, source = _origin_trial_tokens(html, headers)
+    if not tokens:
+        return False, None, [], False
+    features = [f for f in (_decode_ot_feature(t) for t in tokens) if f]
+    is_webmcp = any(_is_webmcp_feature(f) for f in features)
+    return True, source, features, is_webmcp
 
 
 _HTML_LANG = re.compile(
@@ -160,10 +222,12 @@ def detect_page_language(html: str, headers: dict[str, str]) -> str | None:
 
 
 def build_meta(page_url: str, html: str, headers: dict[str, str]) -> CrawlMeta:
-    advertised, source = detect_origin_trial(html, headers)
+    advertised, source, features, is_webmcp = detect_origin_trial(html, headers)
     return CrawlMeta(
         page_url=page_url,
         origin_trial_advertised=advertised,
         origin_trial_source=source,
+        origin_trial_features=features,
+        origin_trial_webmcp=is_webmcp,
         page_language=detect_page_language(html, headers),
     )

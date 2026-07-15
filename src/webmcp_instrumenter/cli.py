@@ -46,9 +46,15 @@ def crawl(
     n_high = sum(1 for c in result.candidates if c.confidence.value == "high")
     n_low = len(result.candidates) - n_high
     typer.echo(f"crawl: {len(result.candidates)} candidate(s) ({n_high} high, {n_low} low) → {out}")
-    if result.meta.origin_trial_advertised:
+    if result.meta.origin_trial_webmcp:
         typer.echo(
-            f"  note: origin advertises a WebMCP origin trial ({result.meta.origin_trial_source})"
+            f"  ✓ origin advertises a WebMCP origin trial ({result.meta.origin_trial_source})"
+        )
+    elif result.meta.origin_trial_advertised:
+        feats = ", ".join(result.meta.origin_trial_features) or "feature undetermined"
+        typer.echo(
+            f"  note: origin carries an origin-trial token, but NOT for WebMCP "
+            f"({result.meta.origin_trial_source}: {feats})"
         )
     n_third_party = sum(1 for c in result.candidates if not c.owner_instrumentable)
     if n_third_party:

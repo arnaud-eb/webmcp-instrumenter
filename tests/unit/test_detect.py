@@ -75,11 +75,53 @@ def test_ids_are_sequential_over_included_only():
     assert ids == ["c1", "c2"]  # hidden one consumed no id
 
 
-def test_origin_trial_meta_and_header_detection():
-    html = '<meta http-equiv="origin-trial" content="X">'
-    assert detect_origin_trial(html, {}) == (True, "meta")
-    assert detect_origin_trial("", {"Origin-Trial": "X"}) == (True, "header")
-    assert detect_origin_trial("", {}) == (False, None)
+def _ot_token(feature: str, sig: bytes = b"\x00" * 64) -> str:
+    """Build a realistic origin-trial token whose payload names `feature`.
+
+    `sig` overrides the 64-byte signature region so tests can reproduce real tokens whose
+    signature bytes happen to contain `{`/`}` (which broke a naive brace search).
+    """
+    import base64
+    import json
+
+    payload = json.dumps({"feature": feature, "origin": "https://ex.com"}).encode()
+    raw = b"\x03" + sig[:64].ljust(64, b"\x00") + len(payload).to_bytes(4, "big") + payload
+    return base64.b64encode(raw).decode()
+
+
+def test_origin_trial_decode_ignores_braces_in_signature():
+    # Regression: the 64-byte signature can contain `{`/`}`; the decoder must skip it and
+    # parse only the JSON payload (a live reCAPTCHA token exposed this).
+    token = _ot_token("WebMCP", sig=b"\x03\xbb#{noise}\x7d" + b"\xff" * 40)
+    _, _, features, is_webmcp = detect_origin_trial(
+        f'<meta http-equiv="origin-trial" content="{token}">', {}
+    )
+    assert features == ["WebMCP"] and is_webmcp is True
+
+
+def test_no_origin_trial():
+    assert detect_origin_trial("", {}) == (False, None, [], False)
+
+
+def test_origin_trial_decodes_webmcp_feature():
+    html = f'<meta http-equiv="origin-trial" content="{_ot_token("WebMCP")}">'
+    advertised, source, features, is_webmcp = detect_origin_trial(html, {})
+    assert (advertised, source, is_webmcp) == (True, "meta", True)
+    assert features == ["WebMCP"]
+
+
+def test_origin_trial_non_webmcp_feature_not_flagged():
+    # e.g. a token injected by an embedded reCAPTCHA widget — present but unrelated.
+    token = _ot_token("DisableThirdPartyStoragePartitioning3")
+    advertised, source, features, is_webmcp = detect_origin_trial("", {"Origin-Trial": token})
+    assert (advertised, source, is_webmcp) == (True, "header", False)
+    assert features == ["DisableThirdPartyStoragePartitioning3"]
+
+
+def test_origin_trial_undecodable_token_is_advertised_but_undetermined():
+    html = '<meta content="not-a-real-token" http-equiv="origin-trial">'  # attr order reversed
+    advertised, source, features, is_webmcp = detect_origin_trial(html, {})
+    assert (advertised, source, features, is_webmcp) == (True, "meta", [], False)
 
 
 def test_page_language_from_html_lang():
