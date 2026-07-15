@@ -118,6 +118,15 @@ def test_origin_trial_non_webmcp_feature_not_flagged():
     assert features == ["DisableThirdPartyStoragePartitioning3"]
 
 
+def test_origin_trial_webmcp_match_is_exact_not_substring():
+    # A feature that merely contains "webmcp" must NOT be flagged (guards the exact match).
+    token = _ot_token("MyWebMCPExtension")
+    _, _, features, is_webmcp = detect_origin_trial(
+        f'<meta http-equiv="origin-trial" content="{token}">', {}
+    )
+    assert features == ["MyWebMCPExtension"] and is_webmcp is False
+
+
 def test_origin_trial_undecodable_token_is_advertised_but_undetermined():
     html = '<meta content="not-a-real-token" http-equiv="origin-trial">'  # attr order reversed
     advertised, source, features, is_webmcp = detect_origin_trial(html, {})

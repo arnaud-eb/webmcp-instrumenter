@@ -176,10 +176,11 @@ def _decode_ot_feature(token: str) -> str | None:
 
 
 def _is_webmcp_feature(feature: str) -> bool:
-    # Heuristic: Chrome hasn't published the exact registered feature string, so match the
-    # obvious identifiers. Tighten to an exact string once confirmed. (FR-017)
-    f = feature.lower()
-    return "webmcp" in f or "modelcontext" in f
+    # The registered origin-trial feature identifier is exactly "WebMCP" — confirmed on the
+    # Chrome demo apps and on Shopify's storefront token (origin cdn.shopify.com). Exact
+    # (case-insensitive) match so an unrelated feature that merely contains the substring
+    # cannot false-positive. (FR-017)
+    return feature.strip().lower() == "webmcp"
 
 
 def detect_origin_trial(

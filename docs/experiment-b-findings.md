@@ -88,6 +88,50 @@ cross-origin iframe like Zenchef.
 
 ---
 
+## Finding 5 — Shopify is already shipping a full WebMCP toolset across its storefronts (the go/no-go pivot)
+
+**Evidence:** `en.nutri-bay.com` (a real Shopify nutrition store, crawled 2026-07-15). The page
+carries a WebMCP origin-trial token whose decoded payload is
+`{"origin":"https://cdn.shopify.com:443","feature":"WebMCP","isThirdParty":true,"expiry":1794873600}`
+(expiry 2026-11-16). Running the storefront in Chrome 149 with WebMCP enabled and calling
+`navigator.modelContext.getTools()` returns **10 live, Shopify-registered tools**:
+
+`search_catalog`, `browse_store`, `get_product`, `show_variant`, `get_cart`, `update_cart`,
+`cancel_cart`, `proceed_to_checkout`, `manage_orders`, `search_shop_policies_and_faqs`.
+
+The token is **third-party, origin `cdn.shopify.com`** — i.e. it is injected by **Shopify's own
+CDN scripts**, not by the merchant. The full commerce flow (search → product → cart → checkout
+→ orders) is instrumented, and because the OT token enables the WebMCP API for Shopify's
+scripts in production Chrome 149, **a real agent visiting any such store sees these 10 tools
+today** — no merchant action required.
+
+**Why it matters — this reshapes go/no-go more sharply than Finding 1.** Finding 1 said the
+leverage point is the ~20 vertical SaaS vendors, not 10,000 SMBs. Finding 5 shows a **platform**
+has already acted: Shopify (millions of merchants) has built a professional-grade WebMCP toolset
+and is rolling it out storefront-wide. The core premise of Experiment B — *"instrument a handful
+of test sites with WebMCP tools and measure invocation volume"* — is **partly overtaken** for the
+entire Shopify segment: the instrumentation exists, done better than a concierge tool would, and
+for free to the merchant. The same is likely to follow for other commerce platforms (Wix,
+BigCommerce) and the booking SaaS vendors from Finding 1 (Zenchef, Salonkee).
+
+**What this leaves for a third-party instrumenter (AgentBridge):** sites *not* on a platform
+that is rolling out WebMCP — bespoke/custom builds — which are the minority and the hardest to
+reach. The measurable question shifts from "can we instrument SMB sites?" to "**is there
+residual demand once the platforms instrument their own merchants?**" and "**where does agent
+traffic actually flow — platform-registered tools or anything else?**"
+
+**Concrete Experiment B action:** the highest-signal measurement is no longer "instrument N test
+sites and count." It is "**observe invocation volume on tools that already exist**" (Shopify's 10
+tools on a store Arnaud can stand up as a Shopify Partners dev store — v1 target #1) and
+"**quantify how much of the addressable web is already platform-instrumented**" (crawl a sample;
+count sites carrying a `cdn.shopify.com` / platform WebMCP third-party token).
+
+**Bonus (validates a tool detail):** this is the third independent site whose decoded OT feature
+string is exactly `WebMCP` (french-bistro demo, Shopify's token). `_is_webmcp_feature` was
+tightened from a substring heuristic to an exact match on the strength of it.
+
+---
+
 ## Consequences for the tool (tracked as spec changes)
 
 - **Crawl must descend into iframes** (Playwright can reach cross-origin frames) and **tag each
