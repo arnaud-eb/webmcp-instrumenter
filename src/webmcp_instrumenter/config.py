@@ -1,13 +1,26 @@
 """Runtime configuration from environment (T009).
 
-No secrets are hard-coded or committed. The Anthropic key is read from the
-environment only when `draft` actually needs it.
+No secrets are hard-coded or committed. Secrets live in a repo-local `.env`
+(git-ignored, see `.env.example`) that is loaded into this process only — they
+are deliberately NOT exported from the shell profile, because a shell-wide
+`ANTHROPIC_API_KEY` outranks the Claude Code subscription login and silently
+bills API credits for every `claude` invocation.
+
+An explicitly-set environment variable still wins over `.env`, so a one-off
+`ANTHROPIC_API_KEY=... webmcp-instrument draft ...` keeps working.
 """
 
 from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+
+from dotenv import find_dotenv, load_dotenv
+
+
+def load_env() -> None:
+    """Load the repo-local `.env` (searching upward from the cwd), if present."""
+    load_dotenv(find_dotenv(usecwd=True), override=False)
 
 
 @dataclass(frozen=True)
@@ -19,6 +32,7 @@ class Config:
 
     @classmethod
     def from_env(cls) -> Config:
+        load_env()
         return cls(
             anthropic_api_key=os.environ.get("ANTHROPIC_API_KEY"),
             # Sonnet is sufficient for schema drafting (research D3).
@@ -31,6 +45,7 @@ class Config:
         if not self.anthropic_api_key:
             raise RuntimeError(
                 "ANTHROPIC_API_KEY is not set — required for the `draft` stage. "
-                "Export it or pass a different --provider."
+                "Copy .env.example to .env and put the key there (do not export it "
+                "from your shell profile: that would override your Claude Code login)."
             )
         return self.anthropic_api_key

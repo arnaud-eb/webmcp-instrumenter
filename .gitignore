@@ -27,6 +27,7 @@ runs/
 # Env / secrets
 .env
 .env.*
+!.env.example
 .dev.vars
 
 # OS
