@@ -132,6 +132,51 @@ tightened from a substring heuristic to an exact match on the strength of it.
 
 ---
 
+## Finding 6 — Supply is nascent, demand is unmeasurable-and-≈0: the metric can't be collected yet
+
+**Evidence:** a batch WebMCP probe (crawl + `getTools()` in Chrome 149) of the announced I/O-2026
+adopters, 2026-07-16:
+
+| Platform | WebMCP origin-trial token | Live registered tools |
+|---|---|---|
+| **Shopify** (via `en.nutri-bay.com`) | yes | **10** (search_catalog … proceed_to_checkout) |
+| Booking.com | no | 0 |
+| Etsy | no | 0 |
+| Instacart | no | 0 |
+| Target | no | 0 |
+| Expedia | no | 0 |
+| Redfin | no | 0 |
+
+(Caveat: homepages only, from an EU IP; deeper/logged-in pages may differ. But **no origin-trial
+token means WebMCP is not enabled in production Chrome for that origin's scripts** regardless — so
+these are not shipping tools to real users yet.) **Only Shopify has actually deployed; every other
+announced adopter is announcement-only.** Live tool execution was confirmed on Shopify:
+`search_catalog({catalog:{query:"caffeine gel"}})` returns structured products + agent "next
+steps"; `get_cart` returns a structured empty cart. (API notes: `executeTool` takes the *tool
+object* from `getTools()`, and arguments must be a JSON *string*.)
+
+**Two structural limits on measuring demand (does anyone actually *invoke* these?):**
+
+1. **Our logger only sees tools we instrument on sites we control.** `logger.js` runs where we
+   inject it; we cannot inject into a third party's production pages, so we cannot observe real
+   end-users' agent invocations on Shopify/booking.com/etc. *Supply* (who exposes tools) is
+   crawlable at scale; *demand* (who calls them) is not — except on a property we own (inject a
+   global `executeTool` shim → capture even the platform's own tool calls) or by driving an agent
+   ourselves (synthetic, not organic).
+2. **The consumer isn't live.** Gemini-in-Chrome's WebMCP support is "coming soon" (Chrome blog),
+   so organic invocation volume is structurally ≈ 0 today for everyone.
+
+**Go/no-go implication — this is the sharpest finding.** The core Experiment B metric, *real
+agent-invocation volume*, **cannot be collected by anyone right now** — the supply side is one
+platform deep and the demand side has no shipped consumer. So the honest answer to "are LLMs
+already using WebMCP?" is **no, not yet, and it isn't yet measurable**. This reframes the build:
+stand up and validate the measurement loop (US4–6) so it is ready the moment agents arrive, prove
+it end-to-end with synthetic invocations, and treat "when do browser agents ship WebMCP
+consumption, and does Shopify's lead widen or stay lonely?" as the real gating signal to re-check
+on a cadence — not something to sit and wait on for 4–6 weeks now.
+
+---
+
 ## Consequences for the tool (tracked as spec changes)
 
 - **Crawl must descend into iframes** (Playwright can reach cross-origin frames) and **tag each
