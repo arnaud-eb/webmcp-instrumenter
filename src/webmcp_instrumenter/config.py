@@ -28,6 +28,7 @@ class Config:
     anthropic_api_key: str | None
     anthropic_model: str
     sink_url: str | None
+    report_token: str | None
     crawl_timeout_s: float
 
     @classmethod
@@ -38,8 +39,29 @@ class Config:
             # Sonnet is sufficient for schema drafting (research D3).
             anthropic_model=os.environ.get("WEBMCP_DRAFT_MODEL", "claude-sonnet-5"),
             sink_url=os.environ.get("WEBMCP_SINK_URL"),
+            report_token=os.environ.get("WEBMCP_REPORT_TOKEN"),
             crawl_timeout_s=float(os.environ.get("WEBMCP_CRAWL_TIMEOUT_S", "30")),
         )
+
+    def report_endpoint(self) -> str:
+        """The Worker's GET /report URL, derived from the sink's /events URL."""
+        if not self.sink_url:
+            raise RuntimeError(
+                "WEBMCP_SINK_URL is not set — required for `report`. Point it at the "
+                "deployed Worker's /events URL (report reuses the same host)."
+            )
+        base = self.sink_url
+        if base.endswith("/events"):
+            base = base[: -len("/events")]
+        return base.rstrip("/") + "/report"
+
+    def require_report_token(self) -> str:
+        if not self.report_token:
+            raise RuntimeError(
+                "WEBMCP_REPORT_TOKEN is not set — required for `report` (the operator token "
+                "you set with `wrangler secret put REPORT_TOKEN`)."
+            )
+        return self.report_token
 
     def require_anthropic_key(self) -> str:
         if not self.anthropic_api_key:

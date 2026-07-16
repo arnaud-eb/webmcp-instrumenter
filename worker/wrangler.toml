@@ -1,11 +1,15 @@
-# Cloudflare Worker — WebMCP invocation logging sink (US4, fleshed out later).
-# Scaffold only at the P1 MVP stage.
+# Cloudflare Worker — WebMCP invocation logging sink (US4).
 name = "webmcp-logger"
 main = "src/index.ts"
 compatibility_date = "2026-07-01"
 
-# D1 binding is added in the US4 phase (T028/T031):
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "webmcp_invocations"
-# database_id = "<filled after `wrangler d1 create`>"
+# D1 binding. One-time setup (hands-on, needs a Cloudflare account):
+#   1. wrangler d1 create webmcp_invocations
+#   2. paste the printed database_id below
+#   3. wrangler d1 execute webmcp_invocations --remote --file=schema.sql
+#   4. wrangler secret put REPORT_TOKEN   # operator token for GET /report
+#   5. wrangler deploy
+[[d1_databases]]
+binding = "DB"
+database_name = "webmcp_invocations"
+database_id = "REPLACE_AFTER_wrangler_d1_create"

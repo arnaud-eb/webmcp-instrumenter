@@ -118,13 +118,24 @@ def generate(
 
 @app.command()
 def report(
-    from_: str = typer.Option(None, "--from", help="Start date (YYYY-MM-DD)."),
-    to: str = typer.Option(None, "--to", help="End date (YYYY-MM-DD)."),
+    from_: str = typer.Option(..., "--from", help="Start date (YYYY-MM-DD), inclusive."),
+    to: str = typer.Option(..., "--to", help="End date (YYYY-MM-DD), inclusive."),
     format: str = typer.Option("table", "--format", help="table|json"),
 ) -> None:
-    """US5: weekly invocation counts (implemented in the P2 phase)."""
-    typer.echo("report: not implemented yet (US5 / P2 phase).")
-    raise typer.Exit(0)
+    """US5: invocation counts grouped by site + tool, with a week-over-week view."""
+    import httpx
+
+    from .report import build_report
+
+    try:
+        typer.echo(build_report(from_, to, fmt=format))
+    except httpx.HTTPStatusError as exc:
+        raise typer.BadParameter(
+            f"report: sink returned {exc.response.status_code} — check WEBMCP_REPORT_TOKEN "
+            f"and that the Worker is deployed ({exc.request.url})"
+        ) from exc
+    except RuntimeError as exc:
+        raise typer.BadParameter(str(exc)) from exc
 
 
 if __name__ == "__main__":

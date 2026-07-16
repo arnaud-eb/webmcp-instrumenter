@@ -106,12 +106,12 @@ approved; manifest lists exactly those; no secrets in any output; nothing approv
 **Independent Test**: Invoke a registered tool → event stored with `param_keys` only (no
 values); take the sink offline → tool call + page still succeed.
 
-- [ ] T028 [US4] D1 schema (`invocations` table, `param_keys` column only — no value columns) in `worker/schema.sql`
-- [ ] T029 [US4] Worker `POST /events` insert-only endpoint (rejects value-bearing fields) in `worker/src/index.ts`
-- [ ] T030 [P] [US4] Worker read path for `report` (scoped, date-range query) in `worker/src/index.ts`
-- [ ] T031 [US4] `wrangler.toml` D1 binding + deploy config; deploy the Worker
-- [ ] T032 [US4] Finalize `logger.js` template: fire-and-forget, swallow all errors (Principle III / FR-010) in `src/webmcp_instrumenter/templates/logger.js.j2`
-- [ ] T033 [P] [US4] Test (**Principle II + III**): event payload has key names only / no values; simulated sink outage does not throw into host page in `tests/unit/test_logger.py`
+- [x] T028 [US4] D1 schema (`invocations` table, `param_keys` column only — no value columns) in `worker/schema.sql`
+- [x] T029 [US4] Worker `POST /events` insert-only endpoint (rejects value-bearing fields) in `worker/src/index.ts`
+- [x] T030 [P] [US4] Worker read path for `report` (scoped, date-range query) in `worker/src/index.ts`
+- [~] T031 [US4] `wrangler.toml` D1 binding + deploy config done; **deploy pending** (hands-on — needs Cloudflare account + `wrangler d1 create`)
+- [x] T032 [US4] Finalize `logger.js` template: fire-and-forget, swallow all errors (Principle III / FR-010) in `src/webmcp_instrumenter/templates/logger.js.j2`
+- [x] T033 [P] [US4] Test (**Principle II + III**): event payload has key names only / no values; simulated sink outage does not throw into host page in `tests/unit/test_logger.py`
 
 **Checkpoint**: US4 works — real invocations are captured, safely.
 
@@ -124,9 +124,9 @@ values); take the sink offline → tool call + page still succeed.
 **Independent Test**: With seeded events, `report --from --to` prints correct grouped counts
 + weekly view; empty range → empty groups, exit 0.
 
-- [ ] T034 [US5] `report` command: query D1 read path for a date range; group by site + tool in `src/webmcp_instrumenter/report.py`
-- [ ] T035 [US5] Week-over-week view + `--format table|json` in `src/webmcp_instrumenter/report.py`
-- [ ] T036 [P] [US5] Integration test: seeded events → expected grouped + weekly counts in `tests/integration/test_report.py`
+- [x] T034 [US5] `report` command: query D1 read path for a date range; group by site + tool in `src/webmcp_instrumenter/report.py`
+- [x] T035 [US5] Week-over-week view + `--format table|json` in `src/webmcp_instrumenter/report.py`
+- [x] T036 [P] [US5] Integration test: seeded events → expected grouped + weekly counts in `tests/integration/test_report.py`
 
 **Checkpoint**: US5 works — the go/no-go signal is readable.
 
