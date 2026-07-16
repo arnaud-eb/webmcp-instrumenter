@@ -125,8 +125,8 @@ while keeping full rigor on the principles above that carry real user/legal risk
 
 ## Scope Discipline & Development Workflow
 
-- **Primary objective of this build:** practice spec-driven development on a real,
-  moderately complex project — not to close real Benelux SMB relationships yet.
+- **Deferred:** closing real Benelux SMB relationships. v1 builds and validates the
+  measurement pipeline on test sites only.
 - **Target sites for v1 are test sites, by deliberate descope:**
   1. A free Shopify Partners dev store Arnaud owns outright — exercises the full pipeline
      including the deploy phase, since no third-party permission is needed. Arnaud does not

@@ -8,9 +8,9 @@ active spec under `specs/` (path in `.specify/feature.json`), not this file.
 The smallest tool that lets Arnaud run **Experiment B**: instrument a handful of
 **test** sites with WebMCP tools and measure real agent-invocation volume over
 4–6 weeks. If invocations are real, the AgentBridge product becomes worth
-building; if near zero, this tool was the whole spend. This is **not** the
-product — resist building one. Primary goal of this build: practice spec-driven
-development on a real, moderately complex project.
+building; if near zero, this tool was the whole spend. This repo is the
+measurement tool, **not** the product — keep it right-sized for answering the
+go/no-go question, and build the product (if any) separately.
 
 ## Spec-Driven Development workflow (how to work here)
 

@@ -308,5 +308,4 @@ in tool definitions.
   possible via `chrome://flags/#enable-webmcp-testing`.
 - **Unrenderable sites out of scope**: sites the crawler cannot render (heavy client-side
   auth walls, CAPTCHAs) are excluded from v1.
-- **Primary objective of this build is to practice spec-driven development** on a real,
-  moderately complex project; closing real SMB relationships is explicitly deferred.
+- **Closing real SMB relationships is explicitly deferred** to v2; v1 targets test sites only.
